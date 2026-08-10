@@ -18,14 +18,17 @@
     "predeploy": "npm run verify",
     "predeploy:test": "npm run verify"
   },
+  "dependencies": {
+    "@telegraf/entity": "^0.7.0"
+  },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.20.3",
     "@cloudflare/workers-types": "^5.20260810.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.8.1",
     "typescript": "^5.9.0",
+    "typescript-eslint": "^8.67.0",
     "vitest": "^4.0.0",
     "wrangler": "^4.0.0"
-  },
-  "dependencies": {
-    "@telegraf/entity": "^0.7.0"
   }
 }

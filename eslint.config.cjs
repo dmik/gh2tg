@@ -1,67 +1,120 @@
 // eslint.config.cjs
-// Flat config + CommonJS. Safe for `"type": "module"` projects.
+// Flat config + CommonJS. Safe for `"type": "module"` projects. Works with both JS and TS.
+
+// This linter config implements the Allman brace style for better visual separation with spaces
+// around punctuation to follow the rules of normal human-readable text (prose).
+
+// For JS projects do:
+//    npm install -D eslint @stylistic/eslint-plugin
+// For TS projects do:
+//    npm install -D eslint @stylistic/eslint-plugin typescript-eslint
+
+
+function reportMissingSpaceBefore (context, node, token, excludedPreviousValues = [])
+{
+  if (! token)
+    return;
+
+  const source = context.sourceCode;
+  const previous = source.getTokenBefore (token, { includeComments: false });
+  if (! previous || excludedPreviousValues.includes (previous.value))
+    return;
+
+  const between = source.text.slice (previous.range [1], token.range [0]);
+  if (/\s/.test (between))
+    return;
+
+  context.report (
+  {
+    node,
+    loc: token.loc,
+    messageId: "expected",
+    fix (fixer)
+    {
+      return fixer.insertTextBefore (token, " ");
+    }
+  });
+}
+
+
+function checkPunctuationSpacing (context, node, tokens, index)
+{
+  const source = context.sourceCode;
+  const punctuation = tokens [index];
+  const previous = tokens [index - 1];
+  const next = tokens [index + 1];
+
+  if (previous && previous.loc.end.line === punctuation.loc.start.line)
+  {
+    const before = source.text.slice (previous.range [1], punctuation.range [0]);
+    if (/\s/.test (before))
+    {
+      context.report (
+      {
+        node,
+        loc: punctuation.loc,
+        messageId: "unexpectedBefore",
+        fix (fixer)
+        {
+          return fixer.removeRange ([ previous.range [1], punctuation.range [0] ]);
+        }
+      });
+    }
+  }
+
+  if (next && next.loc.start.line === punctuation.loc.end.line)
+  {
+    const after = source.text.slice (punctuation.range [1], next.range [0]);
+    if (! /\s/.test (after))
+    {
+      context.report (
+      {
+        node,
+        loc: punctuation.loc,
+        messageId: "expectedAfter",
+        fix (fixer)
+        {
+          return fixer.insertTextAfter (punctuation, " ");
+        }
+      });
+    }
+  }
+}
 
 
 const spaceBeforeComputedBracket =
 {
-  meta :
+  meta:
   {
-    type : "layout",
-    fixable : "whitespace",
-    schema : [],
-    messages :
+    type: "layout",
+    fixable: "whitespace",
+    schema: [],
+    messages:
     {
-      expected : "Expected a space before '[' in computed member access.",
+      expected: "Expected a space before '[' in computed member access.",
     }
   },
 
   create (context)
   {
-    const source = context.getSourceCode ();
+    const source = context.sourceCode;
 
     function check (node)
     {
-      if (! node.computed) return;
+      if (! node.computed)
+        return;
 
-      const objectToken = source.getLastToken (node.object);
       const bracketToken = source.getTokenAfter (
         node.object,
         t => t.value === "["
       );
 
-      if (! objectToken || ! bracketToken) return;
-
       // Do not break optional chaining: obj?.[0]
-      const prevToBracket = source.getTokenBefore (bracketToken, { includeComments : false });
-      if (prevToBracket && prevToBracket.value === "?.") return;
-
-      const between = source.text.slice (
-        objectToken.range [1],
-        bracketToken.range [0]
-      );
-
-      if (/\s/.test (between)) return;
-
-      context.report (
-      {
-        node,
-        messageId : "expected",
-        fix (fixer)
-        {
-          return fixer.insertTextAfter (objectToken, " ");
-        }
-      });
+      reportMissingSpaceBefore (context, node, bracketToken, [ "?." ]);
     }
 
     return {
-      MemberExpression : check,
-      ChainExpression (node)
-      {
-        if (node.expression?.type === "MemberExpression")
-        {
-          check (node.expression);
-        }
-      }
+      MemberExpression: check
     };
   }
 };
@@ -69,193 +122,134 @@ const spaceBeforeComputedBracket =
 
 const spaceBeforeCallParen =
 {
-  meta :
+  meta:
   {
-    type : "layout",
-    fixable : "whitespace",
-    schema : [],
-    messages : { expected : "Expected a space before '(' in call." }
+    type: "layout",
+    fixable: "whitespace",
+    schema: [],
+    messages: { expected: "Expected a space before '(' in call." }
   },
 
   create (context)
   {
-    const source = context.getSourceCode ();
+    const source = context.sourceCode;
 
     function checkCall (node)
     {
-      // node.callee (...)  -> enforce space between callee and '('
-      const calleeToken = source.getLastToken (node.callee);
+      // Enforce a space immediately before the call parenthesis, including
+      // after generic arguments: call <Type> (...).
       const parenToken = source.getTokenAfter (node.callee, t => t.value === "(");
-      if (! calleeToken || ! parenToken) return;
-
-      // Do not break optional chaining: obj?.[0]
-      const prevToParen = source.getTokenBefore (parenToken, { includeComments : false });
-      if (prevToParen && prevToParen.value === "?.") return;
-
-      const between = source.text.slice (calleeToken.range [1], parenToken.range [0]);
-      if (/\s/.test (between)) return;
-
-      context.report (
-      {
-        node,
-        messageId : "expected",
-        fix (fixer)
-        {
-          return fixer.insertTextAfter (calleeToken, " ");
-        }
-      });
+      reportMissingSpaceBefore (context, node, parenToken, [ "?." ]);
     }
 
     return {
-      CallExpression : checkCall,
-      NewExpression : checkCall
+      CallExpression: checkCall,
+      NewExpression: checkCall
     };
   }
 };
 
 
-const forbidKrMultilineObject =
+function createMultilineLiteralAllmanRule (nodeType, openValue, closeValue, description)
 {
-  meta :
-  {
-    type : "layout",
-    fixable : "whitespace",
-    schema : [],
-    messages :
+  return {
+    meta:
     {
-      kr : "Multiline object literals must use Allman style."
-    }
-  },
+      type: "layout",
+      fixable: "whitespace",
+      schema: [],
+      messages: { kr: `Multiline ${description} literals must use Allman style.` }
+    },
 
-  create (context)
-  {
-    const source = context.getSourceCode ();
+    create (context)
+    {
+      const source = context.sourceCode;
 
-    return {
-      ObjectExpression (node)
+      function check (node)
       {
-        const open = source.getFirstToken (node);
-        const close = source.getLastToken (node);
-
-        // single-line object → allow
-        if (open.loc.start.line === close.loc.start.line) return;
-
-        const line = source.lines [open.loc.start.line - 1];
-        const before = line.slice (0, open.loc.start.column);
-
-        // Exception: allow "({\n ... \n})" only when "({" starts the line (optionally indented)
-        if (/^\s*\($/.test (before)) return;
-
-        const prevTok = source.getTokenBefore (open, { includeComments : false });
-
-        // Exception: allow `return {` form
-        if (prevTok && prevTok.type === "Keyword" && prevTok.value === "return") return;
-
-        // if "{" has non-whitespace before it on the same line → K&R
-        if (/\S/.test (before))
-        {
-          context.report (
-          {
-            node,
-            loc : open.loc,
-            messageId : "kr",
-            fix (fixer)
-            {
-              const prev = source.getTokenBefore (open);
-              if (! prev) return null;
-
-              const indent = line.match (/^\s*/) [0];
-              return fixer.replaceTextRange (
-                [ prev.range [1], open.range [0] ],
-                "\n" + indent
-              );
-            }
-          });
-        }
-      }
-    };
-  }
-};
-
-
-const forbidKrMultilineArray =
-{
-  meta :
-  {
-    type : "layout",
-    fixable : "whitespace",
-    schema : [],
-    messages : { kr : "Multiline array literals must use Allman style." }
-  },
-
-  create (context)
-  {
-    const source = context.getSourceCode ();
-
-    return {
-      ArrayExpression (node)
-      {
-        const open = source.getFirstToken (node, t => t.value === "[");
-        const close = source.getLastToken (node, t => t.value === "]");
-        if (! open || ! close) return;
-
-        // single-line array -> allow
-        if (open.loc.start.line === close.loc.start.line) return;
+        const open = source.getFirstToken (node, token => token.value === openValue);
+        const close = source.getLastToken (node, token => token.value === closeValue);
+        if (! open || ! close || open.loc.start.line === close.loc.start.line)
+          return;
 
         const line = source.lines [open.loc.start.line - 1] ?? "";
         const before = line.slice (0, open.loc.start.column);
 
-        // Allow only "\n([ ... ])" case if you want it (optional):
-        if (/^\s*\($/.test (before)) return;
+        // Allow a literal starting immediately after an opening parenthesis.
+        if (/^\s*\($/.test (before))
+          return;
 
-        const prevTok = source.getTokenBefore (open, { includeComments : false });
+        const previous = source.getTokenBefore (open, { includeComments: false });
 
-        // Exception: allow `return {` form
-        if (prevTok && prevTok.type === "Keyword" && prevTok.value === "return") return;
+        // Preserve the explicit `return {` / `return [` exception.
+        if (previous?.type === "Keyword" && previous.value === "return")
+          return;
 
-        // Forbid: something before '[' on same line (K&R multiline)
-        if (/\S/.test (before))
+        if (! /\S/.test (before))
+          return;
+
+        context.report (
         {
-          const prev = source.getTokenBefore (open, { includeComments : false });
-          context.report (
+          node,
+          loc: open.loc,
+          messageId: "kr",
+          fix (fixer)
           {
-            node,
-            loc : open.loc,
-            messageId : "kr",
-            fix (fixer)
-            {
-              if (! prev) return null;
-              const indent = (line.match (/^\s*/) || [ "" ]) [0];
-              return fixer.replaceTextRange ([ prev.range [1], open.range [0] ], "\n" + indent);
-            }
-          });
-        }
+            if (! previous)
+              return null;
+
+            const gap = source.text.slice (previous.range [1], open.range [0]);
+            if (/[^\s]/.test (gap))
+              return null;
+
+            const indent = (line.match (/^\s*/) || [ "" ]) [0];
+            return fixer.replaceTextRange (
+              [ previous.range [1], open.range [0] ],
+              "\n" + indent
+            );
+          }
+        });
       }
-    };
-  }
-};
+
+      return { [nodeType]: check };
+    }
+  };
+}
+
+
+const forbidKrMultilineObject = createMultilineLiteralAllmanRule (
+  "ObjectExpression", "{", "}", "object"
+);
+
+const forbidKrMultilineArray = createMultilineLiteralAllmanRule (
+  "ArrayExpression", "[", "]", "array"
+);
 
 
 const allmanWithIndent =
 {
-  meta :
+  meta:
   {
-    type : "layout",
-    fixable : "whitespace",
-    schema :
+    type: "layout",
+    fixable: "whitespace",
+    schema:
     [
       {
-        type : "object",
-        properties : { allowSingleLine : { type : "boolean" } },
-        additionalProperties : false
+        type: "object",
+        properties: { allowSingleLine: { type: "boolean" } },
+        additionalProperties: false
       }
     ],
-    messages : { allman : "Expected '{' on its own line (Allman), properly indented." }
+    messages:
+    {
+      allman: "Expected '{' on its own line (Allman), properly indented.",
+      continuation: "Expected '{{keyword}}' on a new line after '}'."
+    }
   },
 
   create (context)
   {
-    const source = context.getSourceCode ();
+    const source = context.sourceCode;
     const opt = context.options [0] || {};
     const allow1 = ("allowSingleLine" in opt) ? !! opt.allowSingleLine : false;
 
@@ -271,144 +265,425 @@ const allmanWithIndent =
       // node is a BlockStatement, we want its opening "{"
       const open = source.getFirstToken (node, t => t.value === "{");
       const close = source.getLastToken (node, t => t.value === "}");
-      if (! open || ! close) return;
+      if (! open || ! close)
+        return;
 
-      if (allow1 && open.loc.start.line === close.loc.start.line) return;
+      if (allow1 && open.loc.start.line === close.loc.start.line)
+        return;
 
       // If "{" is already the first non-ws on its line, assume OK.
       const line = source.lines [open.loc.start.line - 1] ?? "";
       const before = line.slice (0, open.loc.start.column);
       const hasNonWsBefore = /\S/.test (before);
-      if (! hasNonWsBefore) return;
+      if (! hasNonWsBefore)
+        return;
 
       // Only care when "{" is on same line as something else (K&R style).
       // Move it to next line and indent to match the line’s indent (Allman).
       context.report (
       {
         node,
-        loc : open.loc,
-        messageId : "allman",
+        loc: open.loc,
+        messageId: "allman",
         fix (fixer)
         {
-          const prev = source.getTokenBefore (open, { includeComments : false });
-          if (! prev) return null;
+          const prev = source.getTokenBefore (open, { includeComments: false });
+          if (! prev)
+            return null;
 
           const baseIndent = indentOfLine (open.loc.start.line);
           const gap = source.text.slice (prev.range [1], open.range [0]);
-          if (/[^\s]/.test (gap)) return null;
+          if (/[^\s]/.test (gap))
+            return null;
 
           return fixer.replaceTextRange ([ prev.range [1], open.range [0] ], "\n" + baseIndent);
         }
       });
     }
 
-    return { BlockStatement : checkBlock };
+    function checkContinuation (node, keywordToken, close)
+    {
+      if (! keywordToken || ! close || close.value !== "}")
+        return;
+      if (close.loc.end.line !== keywordToken.loc.start.line)
+        return;
+
+      const gap = source.text.slice (close.range [1], keywordToken.range [0]);
+      if (/[^\s]/.test (gap))
+        return;
+
+      context.report (
+      {
+        node,
+        loc: keywordToken.loc,
+        messageId: "continuation",
+        data: { keyword: keywordToken.value },
+        fix (fixer)
+        {
+          return fixer.replaceTextRange (
+            [ close.range [1], keywordToken.range [0] ],
+            "\n" + indentOfLine (keywordToken.loc.start.line)
+          );
+        }
+      });
+    }
+
+    function checkCatch (node)
+    {
+      const catchToken = source.getFirstToken (node);
+      if (! catchToken || catchToken.value !== "catch")
+        return;
+
+      const ancestors = source.getAncestors (node);
+      const tryStatement = ancestors [ancestors.length - 1];
+      const tryBlock = tryStatement?.type === "TryStatement" ? tryStatement.block : null;
+      const close = tryBlock ? source.getLastToken (tryBlock) : null;
+      checkContinuation (node, catchToken, close);
+    }
+
+    function checkElse (node)
+    {
+      if (! node.alternate)
+        return;
+
+      const close = source.getLastToken (node.consequent);
+      const elseToken = source.getTokenAfter (node.consequent, { includeComments: false });
+      if (! elseToken || elseToken.value !== "else")
+        return;
+
+      checkContinuation (node, elseToken, close);
+    }
+
+    function checkFinally (node)
+    {
+      if (! node.finalizer)
+        return;
+
+      const finallyToken = source.getTokenBefore (node.finalizer, { includeComments: false });
+      if (! finallyToken || finallyToken.value !== "finally")
+        return;
+
+      const precedingBlock = node.handler ? node.handler.body : node.block;
+      const close = source.getLastToken (precedingBlock);
+      checkContinuation (node, finallyToken, close);
+    }
+
+    return {
+      BlockStatement: checkBlock,
+      SwitchStatement: checkBlock,
+      CatchClause: checkCatch,
+      IfStatement: checkElse,
+      TryStatement: checkFinally,
+      TSInterfaceBody: checkBlock,
+      TSTypeLiteral: checkBlock,
+      TSEnumBody: checkBlock,
+      TSModuleBlock: checkBlock
+    };
   }
 };
 
 
-module.exports =
-[
+const semicolonSpacing =
+{
+  meta:
   {
-    files : [ "**/*.{js,cjs,mjs,jsx}" ],
-
-    languageOptions :
+    type: "layout",
+    fixable: "whitespace",
+    schema: [],
+    messages:
     {
-      ecmaVersion : "latest",
-      sourceType : "module"
-    },
+      unexpectedBefore: "Unexpected space before semicolon.",
+      expectedAfter: "Expected a space after semicolon."
+    }
+  },
 
-    plugins :
-    {
-      "@stylistic" : require ("@stylistic/eslint-plugin"),
-      "custom-style" :
+  create (context)
+  {
+    const source = context.sourceCode;
+
+    return {
+      Program (node)
       {
-        rules :
+        const tokens = source.getTokens (node, { includeComments: true });
+
+        tokens.forEach ((semicolon, index) =>
         {
-          "space-before-computed-bracket" : spaceBeforeComputedBracket,
-          "space-before-call-paren" : spaceBeforeCallParen,
-          "no-kr-multiline-object" : forbidKrMultilineObject,
-          "no-kr-multiline-array" : forbidKrMultilineArray,
-          "allman-block-brace" : allmanWithIndent
+          if (semicolon.value !== ";")
+            return;
+
+          checkPunctuationSpacing (context, node, tokens, index);
+        });
+      }
+    };
+  }
+};
+
+
+const colonSpacing =
+{
+  meta:
+  {
+    type: "layout",
+    fixable: "whitespace",
+    schema: [],
+    messages:
+    {
+      unexpectedBefore: "Unexpected space before colon.",
+      expectedAfter: "Expected a space after colon.",
+      unexpectedBeforeOptional: "Unexpected space before optional parameter marker."
+    }
+  },
+
+  create (context)
+  {
+    const source = context.sourceCode;
+    const excludedColons = new Set ();
+
+    function excludeConditionalColon (consequent, alternate)
+    {
+      const colon = source.getTokensBetween (consequent, alternate)
+      .find (token => token.value === ":");
+
+      if (colon)
+        excludedColons.add (colon.range [0]);
+    }
+
+    return {
+      JSXNamespacedName (node)
+      {
+        const colon = source.getTokens (node).find (token => token.value === ":");
+        if (colon)
+          excludedColons.add (colon.range [0]);
+      },
+
+      ConditionalExpression (node)
+      {
+        excludeConditionalColon (node.consequent, node.alternate);
+      },
+
+      TSConditionalType (node)
+      {
+        excludeConditionalColon (node.trueType, node.falseType);
+      },
+
+      "Program:exit" (node)
+      {
+        const tokens = source.getTokens (node, { includeComments: true });
+
+        tokens.forEach ((colon, index) =>
+        {
+          if (colon.value !== ":" || excludedColons.has (colon.range [0]))
+            return;
+
+          const previous = tokens [index - 1];
+          if (previous?.value === "?")
+          {
+            const optionalTarget = tokens [index - 2];
+            if (optionalTarget && optionalTarget.loc.end.line === previous.loc.start.line)
+            {
+              const beforeOptional = source.text.slice (
+                optionalTarget.range [1],
+                previous.range [0]
+              );
+
+              if (/\s/.test (beforeOptional))
+              {
+                context.report (
+                {
+                  node,
+                  loc: previous.loc,
+                  messageId: "unexpectedBeforeOptional",
+                  fix (fixer)
+                  {
+                    return fixer.removeRange (
+                      [ optionalTarget.range [1], previous.range [0] ]
+                    );
+                  }
+                });
+              }
+            }
+          }
+
+          checkPunctuationSpacing (context, node, tokens, index);
+        });
+      }
+    };
+  }
+};
+
+
+const spaceBeforeGenericAngleBracket =
+{
+  meta:
+  {
+    type: "layout",
+    fixable: "whitespace",
+    schema: [],
+    messages:
+    {
+      expected: "Expected a space before the generic '<'."
+    }
+  },
+
+  create (context)
+  {
+    const source = context.sourceCode;
+
+    function check (node)
+    {
+      const angleBracket = source.getFirstToken (node);
+      if (! angleBracket || angleBracket.value !== "<")
+        return;
+
+      reportMissingSpaceBefore (context, node, angleBracket);
+    }
+
+    return {
+      TSTypeParameterDeclaration: check,
+      TSTypeParameterInstantiation: check
+    };
+  }
+};
+
+
+const spaceBeforeArrayTypeBracket =
+{
+  meta:
+  {
+    type: "layout",
+    fixable: "whitespace",
+    schema: [],
+    messages:
+    {
+      expected: "Expected a space before '[]' in an array type."
+    }
+  },
+
+  create (context)
+  {
+    const source = context.sourceCode;
+
+    return {
+      TSArrayType (node)
+      {
+        const bracket = source.getTokenAfter (
+          node.elementType,
+          token => token.value === "["
+        );
+        if (! bracket)
+          return;
+
+        reportMissingSpaceBefore (context, node, bracket);
+      }
+    };
+  }
+};
+
+
+const sharedConfig =
+{
+    plugins:
+    {
+      "@stylistic": require ("@stylistic/eslint-plugin"),
+      "custom-style":
+      {
+        rules:
+        {
+          "space-before-computed-bracket": spaceBeforeComputedBracket,
+          "space-before-call-paren": spaceBeforeCallParen,
+          "no-kr-multiline-object": forbidKrMultilineObject,
+          "no-kr-multiline-array": forbidKrMultilineArray,
+          "allman-block-brace": allmanWithIndent,
+          "semicolon-spacing": semicolonSpacing,
+          "colon-spacing": colonSpacing,
+          "space-before-generic-angle-bracket": spaceBeforeGenericAngleBracket,
+          "space-before-array-type-bracket": spaceBeforeArrayTypeBracket
         }
       }
     },
 
-    rules :
+    rules:
     {
       // This one is too strict/inflexible, we use @stylistic/indent
       // "indent" : [ "error", 2 ],
 
-      // Terminating semicolun
-      "semi" : [ "error", "always" ],
-      "semi-spacing" : [ "error", { before : false, after : true } ],
+      // Terminating semicolon
+
+      "semi": [ "error", "always" ],
+      "semi-spacing": "off",
 
       // Allman style for braces, brackets, etc
 
       // "brace-style" : [ "error", "allman", { "allowSingleLine" : true } ],
-      "brace-style" : "off",
-      "custom-style/allman-block-brace" : [ "error", { "allowSingleLine" : true } ],
+      "brace-style": "off",
+      "custom-style/allman-block-brace": [ "error", { "allowSingleLine": true } ],
 
-      "space-before-blocks" : [ "error", "always" ],
+      "space-before-blocks": [ "error", "always" ],
 
-      "custom-style/no-kr-multiline-object" : [ "error" ],
-      "custom-style/no-kr-multiline-array" : [ "error" ],
+      "custom-style/no-kr-multiline-object": [ "error" ],
+      "custom-style/no-kr-multiline-array": [ "error" ],
+      "custom-style/semicolon-spacing": "error",
+      "custom-style/colon-spacing": "error",
+      "custom-style/space-before-generic-angle-bracket": "error",
+      "custom-style/space-before-array-type-bracket": "error",
+      "@stylistic/nonblock-statement-body-position": [ "error", "below" ],
 
       // Spacing
 
-      "keyword-spacing" : [ "error", { before : true, after : true } ],
-      "space-infix-ops" : "error",
-      "comma-spacing" : [ "error", { before : false, after : true } ],
-      "semi-spacing" : [ "error", { before : false, after : true } ],
-      "space-unary-ops" :
+      "keyword-spacing": [ "error", { before: true, after: true } ],
+      "space-infix-ops": "error",
+      "comma-spacing": [ "error", { before: false, after: true } ],
+      "space-unary-ops":
       [
         "error",
         {
-          "words" : true,
-          "nonwords" : true,
-          "overrides" :
+          "words": true,
+          "nonwords": true,
+          "overrides":
           {
-            "-" : false
+            "-": false
           }
         }
       ],
 
-      "space-in-parens" : [ "error", "never" ],
-      "array-bracket-spacing" : [ "error", "always" ],
-      "computed-property-spacing" : [ "error", "never" ],
-      "space-before-blocks" : [ "error", "always" ],
+      "space-in-parens": [ "error", "never" ],
+      "array-bracket-spacing": [ "error", "always" ],
+      "object-curly-spacing": [ "error", "always" ],
+      "computed-property-spacing": [ "error", "never" ],
 
-      "@stylistic/space-before-function-paren" :
+      "@stylistic/space-before-function-paren":
       [
         "error",
         {
-          anonymous : "always",
-          named : "always",
-          asyncArrow : "always"
+          anonymous: "always",
+          named: "always",
+          asyncArrow: "always"
         }
       ],
 
-      "no-whitespace-before-property" : "off",
-      "custom-style/space-before-computed-bracket" : "error",
+      "no-whitespace-before-property": "off",
+      "custom-style/space-before-computed-bracket": "error",
 
-      "custom-style/space-before-call-paren" : "error",
+      "custom-style/space-before-call-paren": "error",
 
-      "operator-linebreak" : "off",
+      "operator-linebreak": "off",
 
-      "@stylistic/indent" :
+      // Indent
+
+      "@stylistic/indent":
       [
         "error", 2,
         {
-          "SwitchCase" : 1,
-          "MemberExpression" : 0,
-          "CallExpression" : { "arguments" : 1 },
-          "VariableDeclarator" : { "const" : 0, "let" : 0, "var" : 0 },
-          "FunctionExpression" :
+          "SwitchCase": 1,
+          "MemberExpression": 0,
+          "CallExpression": { "arguments": 1 },
+          "VariableDeclarator": { "const": 0, "let": 0, "var": 0 },
+          "FunctionExpression":
           {
-            "parameters" : 0,
-            "body" : 1
+            "parameters": 0,
+            "body": 1
           },
-          "ignoredNodes" :
+          "ignoredNodes":
           [
             "VariableDeclarator > ObjectExpression",
             "VariableDeclarator > ObjectExpression > Property",
@@ -431,16 +706,61 @@ module.exports =
         }
       ],
 
-      "key-spacing" :
-      [
-        "error",
-        {
-          "beforeColon" : true,
-          "afterColon" : true
-        }
-      ],
+      "key-spacing": "off",
 
-      "dot-location" : [ "error", "property" ],
+      "dot-location": [ "error", "property" ],
     }
-  }
-];
+};
+
+
+const javascriptConfig =
+{
+  files: [ "**/*.{js,cjs,mjs,jsx}" ],
+
+  languageOptions:
+  {
+    ecmaVersion: "latest",
+    sourceType: "module"
+  },
+
+  ...sharedConfig
+};
+
+
+const configs = [ javascriptConfig ];
+
+// TypeScript support is optional
+let tseslintPath;
+
+try
+{
+  tseslintPath = require.resolve ("typescript-eslint");
+}
+catch (error)
+{
+  if (error?.code !== "MODULE_NOT_FOUND")
+    throw error;
+}
+
+if (tseslintPath)
+{
+  // Load outside the resolution guard so missing transitive dependencies fail loudly.
+  const tseslint = require (tseslintPath);
+
+  configs.push (
+  {
+    files: [ "**/*.{ts,tsx,mts,cts}" ],
+
+    languageOptions:
+    {
+      parser: tseslint.parser,
+      ecmaVersion: "latest",
+      sourceType: "module"
+    },
+
+    ...sharedConfig
+  });
+}
+
+
+module.exports = configs;
