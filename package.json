@@ -1,0 +1,31 @@
+{
+  "name": "gh2tg-cloudflare-worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "init": "wrangler secret bulk .secrets --env ''",
+    "init:test": "wrangler secret bulk .secrets.test --env test",
+    "deploy": "wrangler deploy --env ''",
+    "deploy:test": "wrangler deploy --env test",
+    "delete": "wrangler delete --env ''",
+    "delete:test": "wrangler delete --env test",
+    "dev": "wrangler dev --port 8787 --tunnel --tunnel-name gh2tg-dev --env ''",
+    "types": "wrangler types src/env.d.ts --include-runtime false",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm test",
+    "test": "vitest run",
+    "predeploy": "npm run verify",
+    "predeploy:test": "npm run verify"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.20.3",
+    "@cloudflare/workers-types": "^5.20260810.1",
+    "typescript": "^5.9.0",
+    "vitest": "^4.0.0",
+    "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "@telegraf/entity": "^0.7.0"
+  }
+}
