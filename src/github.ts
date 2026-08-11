@@ -57,19 +57,28 @@ function getFirst (payload_: GitHubPayload, paths_: string): unknown
 }
 
 
-function getResource (payload_: GitHubPayload): string
+function getResource (payload_: GitHubPayload): [ string, string, unknown ]
 {
-  let resource;
+  let name, type, url;
 
-  if (resource = get (payload_, 'repository.full_name'))
-    resource = `📚 ${link (resource, get (payload_, 'repository.html_url'))}`;
-  else if (resource = get (payload_, 'organization.login'))
+  if (name = get (payload_, 'repository.full_name'))
+  {
+    type = `${get (payload_, 'repository.private') ? 'private ' : ''}repository`;
+    url = get (payload_, 'repository.html_url');
+  }
+  else if (name = get (payload_, 'organization.login'))
+  {
     // NOTE: No 'organization.html_url' in payload, adjust API URL (works for github.com only)
-    resource = `🏢 ${link (resource, (get (payload_, 'organization.url') as string)?.replace ('//api.github.com/orgs/', '//github.com/'))}`;
+    type = 'organization';
+    url = (get (payload_, 'organization.url') as string)?.replace ('//api.github.com/orgs/', '//github.com/');
+  }
   else
-    resource = `❔ ${link ('Unsupported resource')}`;
+  {
+    name = 'Unsupported resource';
+    type = 'resource';
+  }
 
-  return resource;
+  return [ `${link (name, url)}`, type, url ];
 }
 
 
@@ -85,20 +94,21 @@ function getSender (payload_: GitHubPayload): string
 export function formatGitHubEvent (event_: string, payload_: GitHubPayload): SendMessage
 {
   const action = escapeHtml (payload_.action ?? 'updated');
-  const resource = getResource (payload_);
+  const [ resName, resType, resUrl ] = getResource (payload_);
   const sender = getSender (payload_);
 
   switch (event_)
   {
     case 'ping':
-      return [ `🏓 <b>${sender} connected</b> ${resource}` ];
+      return [ `🏓 <b>${sender} connected ${resType}</b> ${resName}`, ! resUrl ?
+        false : { link_preview_options: { url: resUrl } } ];
 
     case 'push':
     {
       const branch = escapeHtml (String (payload_.ref ?? '').replace ('refs/heads/', ''));
       const commits: UnknownObject [] = Array.isArray (payload_.commits) ? payload_.commits : [];
       const count = commits.length;
-      let text = `📦 <b>${sender} pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)}</b> to 🪾 ${code (branch)} in ${resource}:\n`;
+      let text = `📦 <b>${sender} pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)}</b> to 🪾 ${code (branch)} in ${resName}:\n`;
       for (const [ i, commit ] of commits.entries ())
       {
         if (i >= MAX_COMMITS)
@@ -114,31 +124,31 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
     }
 
     case 'issues':
-      return [ `📝 <b>${sender} ${action} issue</b> ${link (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'issue.html_url'))} in ${resource}` ];
+      return [ `📝 <b>${sender} ${action} issue</b> ${link (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'issue.html_url'))} in ${resName}` ];
 
     case 'issue_comment':
-      return [ `💬 <b>${sender} ${action} issue comment</b> ${link (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'comment.html_url'))} in ${resource}` ];
+      return [ `💬 <b>${sender} ${action} issue comment</b> ${link (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'comment.html_url'))} in ${resName}` ];
 
     case 'pull_request':
-      return [ `🔀 <b>${sender} ${action} pull request</b> ${link (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'pull_request.html_url'))} in ${resource}` ];
+      return [ `🔀 <b>${sender} ${action} pull request</b> ${link (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'pull_request.html_url'))} in ${resName}` ];
 
     case 'pull_request_review':
-      return [ `👀 <b>${sender} ${action} pull request review</b> ${link (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'review.html_url'))} in ${resource}` ];
+      return [ `👀 <b>${sender} ${action} pull request review</b> ${link (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'review.html_url'))} in ${resName}` ];
 
     case 'release':
-      return [ `🚀 <b>${sender} ${action} release</b> ${link (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))} in ${resource}` ];
+      return [ `🚀 <b>${sender} ${action} release</b> ${link (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))} in ${resName}` ];
 
     case 'workflow_run':
-      return [ `⚙️ <b>${sender} ${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow</b> ${link (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))} in ${resource}` ];
+      return [ `⚙️ <b>${sender} ${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow</b> ${link (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))} in ${resName}` ];
 
     case 'star':
-      return [ `⭐ <b>${sender} ${action} a star</b> on ${resource}` ];
+      return [ `⭐ <b>${sender} ${action} a star</b> on ${resName}` ];
 
     case 'fork':
-      return [ `🍴 <b>${sender} forked</b> ${resource} as ${link (get (payload_, 'forkee.full_name'), get (payload_, 'forkee.html_url'))}` ];
+      return [ `🍴 <b>${sender} forked</b> ${resName} as ${link (get (payload_, 'forkee.full_name'), get (payload_, 'forkee.html_url'))}` ];
 
     default:
-      return [ `🔔 <b>${sender} ${action} ${escapeHtml (event_)}</b> in ${resource}` ];
+      return [ `🔔 <b>${sender} ${action} ${escapeHtml (event_)}</b> in ${resName}` ];
   }
 }
 
