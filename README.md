@@ -156,5 +156,16 @@ project-specific `src/env.d.ts` declaration.
 npm run verify
 ```
 
+To send a saved GitHub payload through the formatter to the Telegram chat configured in `.dev.vars`,
+put it at `test/fixtures/<x-github-event>/<name>.json` and run:
+
+```sh
+npm run check-fixtures
+```
+
+The command first prompts for the event directory and then for a JSON fixture in that directory.
+
+# Notes
+
 Secrets are never logged or committed. A failed Telegram API call returns `502`, causing GitHub to
 record the delivery as failed so it can be redelivered.

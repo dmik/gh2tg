@@ -16,7 +16,8 @@
     "verify": "npm run typecheck && npm test",
     "test": "vitest run",
     "predeploy": "npm run verify",
-    "predeploy:test": "npm run verify"
+    "predeploy:test": "npm run verify",
+    "check-fixtures": "node test/check-fixtures.ts"
   },
   "dependencies": {
     "@telegraf/entity": "^0.7.0"
@@ -25,6 +26,7 @@
     "@cloudflare/vitest-pool-workers": "^0.20.3",
     "@cloudflare/workers-types": "^5.20260810.1",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/node": "^26.2.0",
     "eslint": "^10.8.1",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.67.0",
