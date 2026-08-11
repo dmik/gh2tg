@@ -1,0 +1,36 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "verify",
+			"problemMatcher": [],
+			"label": "npm: verify",
+			"detail": "npm run typecheck && npm test",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "npm",
+			"script": "dev",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"label": "npm: dev",
+			"detail": "wrangler dev --port 8787 --tunnel --tunnel-name gh2tg-dev --env ''",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "npm",
+			"script": "check-fixtures",
+			"problemMatcher": [],
+			"label": "npm: check-fixtures",
+			"detail": "node test/check-fixtures.ts"
+		}
+	]
+}
