@@ -1,3 +1,6 @@
+import type { SendMessage } from './telegram';
+
+
 type UnknownObject = Record <string, unknown>;
 
 // TODO: Bring a full typedef and get rid of `get` and `getFirst`
@@ -79,7 +82,7 @@ function getSender (payload_: GitHubPayload): string
 }
 
 
-export function formatGitHubEvent (event_: string, payload_: GitHubPayload): string
+export function formatGitHubEvent (event_: string, payload_: GitHubPayload): SendMessage
 {
   const action = escapeHtml (payload_.action ?? 'updated');
   const resource = getResource (payload_);
@@ -88,7 +91,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): str
   switch (event_)
   {
     case 'ping':
-      return `🏓 <b>${sender} connected</b> ${resource}`;
+      return [ `🏓 <b>${sender} connected</b> ${resource}` ];
 
     case 'push':
     {
@@ -107,35 +110,35 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): str
         const message = String (commit.message ?? '').split ('\n') [0];
         text += `\n• ${link (sha, commit.url)}: ${escapeHtml (message)}`;
       }
-      return text;
+      return [ text ];
     }
 
     case 'issues':
-      return `📝 <b>${sender} ${action} issue</b> ${link (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'issue.html_url'))} in ${resource}`;
+      return [ `📝 <b>${sender} ${action} issue</b> ${link (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'issue.html_url'))} in ${resource}` ];
 
     case 'issue_comment':
-      return `💬 <b>${sender} ${action} issue comment</b> ${link (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'comment.html_url'))} in ${resource}`;
+      return [ `💬 <b>${sender} ${action} issue comment</b> ${link (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'comment.html_url'))} in ${resource}` ];
 
     case 'pull_request':
-      return `🔀 <b>${sender} ${action} pull request</b> ${link (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'pull_request.html_url'))} in ${resource}`;
+      return [ `🔀 <b>${sender} ${action} pull request</b> ${link (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'pull_request.html_url'))} in ${resource}` ];
 
     case 'pull_request_review':
-      return `👀 <b>${sender} ${action} pull request review</b> ${link (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'review.html_url'))} in ${resource}`;
+      return [ `👀 <b>${sender} ${action} pull request review</b> ${link (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'review.html_url'))} in ${resource}` ];
 
     case 'release':
-      return `🚀 <b>${sender} ${action} release</b> ${link (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))} in ${resource}`;
+      return [ `🚀 <b>${sender} ${action} release</b> ${link (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))} in ${resource}` ];
 
     case 'workflow_run':
-      return `⚙️ <b>${sender} ${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow</b> ${link (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))} in ${resource}`;
+      return [ `⚙️ <b>${sender} ${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow</b> ${link (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))} in ${resource}` ];
 
     case 'star':
-      return `⭐ <b>${sender} ${action} a star</b> on ${resource}`;
+      return [ `⭐ <b>${sender} ${action} a star</b> on ${resource}` ];
 
     case 'fork':
-      return `🍴 <b>${sender} forked</b> ${resource} as ${link (get (payload_, 'forkee.full_name'), get (payload_, 'forkee.html_url'))}`;
+      return [ `🍴 <b>${sender} forked</b> ${resource} as ${link (get (payload_, 'forkee.full_name'), get (payload_, 'forkee.html_url'))}` ];
 
     default:
-      return `🔔 <b>${sender} ${action} ${escapeHtml (event_)}</b> in ${resource}`;
+      return [ `🔔 <b>${sender} ${action} ${escapeHtml (event_)}</b> in ${resource}` ];
   }
 }
 

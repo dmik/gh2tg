@@ -1,6 +1,8 @@
 import { parse_html } from '@telegraf/entity';
 
 
+export type SendMessage = [ text: string, previewOrOptions?: boolean | object ];
+
 const TELEGRAM_TEXT_LIMIT = 4096;
 
 type TelegramMessage = ReturnType <typeof parse_html>;
@@ -38,17 +40,22 @@ export function splitMessage (html_: string): TelegramMessage []
 }
 
 
-export async function sendTelegram (message_: string, env_: Env): Promise <void>
+export async function sendMessage (message_: SendMessage, env_: Env): Promise <void>
 {
   const endpoint = `https://api.telegram.org/bot${env_.TELEGRAM_BOT_TOKEN}/sendMessage`;
-  for (const chunk of splitMessage (message_))
+  const [ message, options ] = message_;
+
+  const apiOptions = typeof options === 'object' ? options : { disable_web_page_preview: ! options };
+
+  for (const chunk of splitMessage (message))
   {
     const response = await fetch (endpoint,
     {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify ({ chat_id: env_.TELEGRAM_CHAT_ID, ...chunk, disable_web_page_preview: true }),
+      body: JSON.stringify ({ ...apiOptions, chat_id: env_.TELEGRAM_CHAT_ID, ...chunk }),
     });
+
     if (! response.ok)
     {
       const detail = await response.text ();

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { formatGitHubEvent, verifyGitHubSignature } from '../src/github';
 import { readBodyWithLimit } from '../src/http';
-import { splitMessage } from '../src/telegram';
+import { sendMessage, splitMessage } from '../src/telegram';
 import { MAX_WEBHOOK_BODY_BYTES, handleRequest } from '../src/worker';
 
 
@@ -97,7 +97,7 @@ describe ('webhook', () =>
 
   it ('reacts to an organization webhook ping', () =>
   {
-    const message = formatGitHubEvent ('ping',
+    const [ message ] = formatGitHubEvent ('ping',
     {
       organization:
       {
@@ -111,7 +111,7 @@ describe ('webhook', () =>
 
   it ('reacts to an unsupported webhook ping', () =>
   {
-    const message = formatGitHubEvent ('ping', {});
+    const [ message ] = formatGitHubEvent ('ping', {});
     expect (message).toContain ('connected');
     expect (message).toContain ('Unsupported resource');
   });
@@ -120,9 +120,33 @@ describe ('webhook', () =>
 
 describe ('message formatting', () =>
 {
+  it ('honors the per-message preview indicator', async () =>
+  {
+    const fetchMock = vi.spyOn (globalThis, 'fetch').mockResolvedValue (new Response ('{}', { status: 200 }));
+
+    await sendMessage ([ 'With preview', true ], env);
+
+    expect (fetchMock).toHaveBeenCalledOnce ();
+    const body = JSON.parse (String (fetchMock.mock.calls [0] [1]?.body)) as Record <string, unknown>;
+    expect (body.disable_web_page_preview).toBe (false);
+  });
+
+  it ('expands per-message options into the Telegram request', async () =>
+  {
+    const fetchMock = vi.spyOn (globalThis, 'fetch').mockResolvedValue (new Response ('{}', { status: 200 }));
+    const linkPreviewOptions = { url: 'https://github.com/acme/app', prefer_large_media: true };
+
+    await sendMessage ([ 'With selected preview', { link_preview_options: linkPreviewOptions, disable_notification: true } ], env);
+
+    const body = JSON.parse (String (fetchMock.mock.calls [0] [1]?.body)) as Record <string, unknown>;
+    expect (body.link_preview_options).toEqual (linkPreviewOptions);
+    expect (body.disable_notification).toBe (true);
+    expect (body.disable_web_page_preview).toBeUndefined ();
+  });
+
   it ('escapes untrusted HTML', () =>
   {
-    const message = formatGitHubEvent ('issues',
+    const [ message ] = formatGitHubEvent ('issues',
     {
       action: 'opened',
       sender: { login: '<admin>' },

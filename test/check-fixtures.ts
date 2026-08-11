@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline/promises';
 
 import { formatGitHubEvent, type GitHubPayload } from '../src/github.ts';
-import { sendTelegram } from '../src/telegram.ts';
+import { sendMessage } from '../src/telegram.ts';
 
 
 const FIXTURES_DIR = join (dirname (fileURLToPath (import.meta.url)), 'fixtures');
@@ -85,8 +85,9 @@ async function main (): Promise <void>
       const payload = JSON.parse (await readFile (join (FIXTURES_DIR, event, file), 'utf8')) as GitHubPayload;
       const message = formatGitHubEvent (event, payload);
 
-      console.log (`\n${message}\n`);
-      await sendTelegram (message,
+      console.log (`\n${message [0]}\n\nOptions: ${JSON.stringify (message [1])}\n`);
+
+      await sendMessage (message,
       {
         GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET ?? '',
         TELEGRAM_BOT_TOKEN: token,

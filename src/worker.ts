@@ -1,6 +1,6 @@
 import { formatGitHubEvent, type GitHubPayload, verifyGitHubSignature } from './github';
 import { readBodyWithLimit } from './http';
-import { sendTelegram } from './telegram';
+import { sendMessage } from './telegram';
 import { tryCatch } from './util';
 
 
@@ -48,7 +48,7 @@ export async function handleRequest (request_: Request, env_: Env): Promise <Res
 
   try
   {
-    await sendTelegram (formatGitHubEvent (event, payload), env_);
+    await sendMessage (formatGitHubEvent (event, payload), env_);
     return json ({ ok: true, event, delivery });
   }
   catch (error)
