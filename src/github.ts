@@ -146,14 +146,24 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
         text += `\n• ${link (sha, commit.url)}: ${escapeHtml (nl < 0 ? message : message.slice (0, nl))}`;
       }
       text = text.trim ();
-      return [ header + (text ? expQuote (text) : text) ];
+      return [ header + (text ? `\n\n${expQuote (text)}` : text) ];
     }
 
     case 'issues':
-      return [ `📝 ${sender} ${action} issue ${boldLink (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'issue.html_url'))} in ${resName}` ];
+    {
+      const body = (action === 'opened') ? String (get (payload_, 'issue.body') ?? '').trim () : '';
+      const text = body ? `\n\n${expQuote (body)}` : body;
+      return [ `📝 ${sender} ${action} issue ${boldLink (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'issue.html_url'))} in ${resName}${text}` ];
+    }
 
     case 'issue_comment':
-      return [ `💬 ${sender} ${action} issue comment ${boldLink (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'comment.html_url'))} in ${resName}` ];
+    {
+      const [ body, actionText ] = (action === 'created')
+        ? [ String (get (payload_, 'comment.body') ?? '').trim (), 'commented on issue' ]
+        : [ '', `${action} issue comment` ];
+      const text = body ? `\n\n${expQuote (body)}` : body;
+      return [ `💬 ${sender} ${actionText} ${boldLink (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'comment.html_url'))} in ${resName}${text}` ];
+    }
 
     case 'pull_request':
       return [ `🔀 ${sender} ${action} pull request ${boldLink (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'pull_request.html_url'))} in ${resName}` ];
