@@ -7,7 +7,7 @@ type UnknownObject = Record <string, unknown>;
 export type GitHubPayload = UnknownObject;
 
 const Encoder = new TextEncoder ();
-const MAX_COMMITS = 8;
+const MAX_COMMITS = 16;
 
 
 function escapeHtml (value_: unknown): string
@@ -33,9 +33,26 @@ function boldLink (label_: unknown, url_?: unknown): string
 }
 
 
+function commitRangeLink (label_: unknown, url_: unknown, from_: unknown, to_: unknown): string
+{
+  return `${link (label_, `${url_}/compare/${from_}^...${to_}`)}`;
+}
+
+
 function code (text_: string): string
 {
   return `<code>${escapeHtml (text_)}</code>`;
+}
+
+
+function quote (text_: string): string
+{
+  return `<blockquote>${text_}</blockquote>`;
+}
+
+function expQuote (text_: string): string
+{
+  return `<blockquote expandable>${text_}</blockquote>`;
 }
 
 
@@ -114,19 +131,22 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const branch = escapeHtml (String (payload_.ref ?? '').replace ('refs/heads/', ''));
       const commits: UnknownObject [] = Array.isArray (payload_.commits) ? payload_.commits : [];
       const count = commits.length;
-      let text = `📦 ${sender} pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${code (branch)} in ${resName}:\n`;
+      const header = `📦 ${sender} pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${code (branch)} in ${resName}`;
+      let text = '';
       for (const [ i, commit ] of commits.entries ())
       {
         if (i >= MAX_COMMITS)
         {
-          text += `\n• …and ${count - i} more`;
+          text += `\n…and ${commitRangeLink (`${count - i} more`, resUrl, commit.id, commits [count - 1].id)}`;
           break;
         }
-        const sha = String (commit.id ?? '???').slice (0, 7);
-        const message = String (commit.message ?? '').split ('\n') [0];
-        text += `\n• ${link (sha, commit.url)}: ${escapeHtml (message)}`;
+        const sha = String (commit.id ?? '???????').slice (0, 7);
+        const message = String (commit.message ?? '');
+        const nl = message.indexOf ('\n');
+        text += `\n• ${link (sha, commit.url)}: ${escapeHtml (nl < 0 ? message : message.slice (0, nl))}`;
       }
-      return [ text ];
+      text = text.trim ();
+      return [ header + (text ? expQuote (text) : text) ];
     }
 
     case 'issues':

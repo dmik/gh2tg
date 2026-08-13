@@ -1,0 +1,958 @@
+{
+  "ref": "refs/heads/master-os2",
+  "before": "0000000000000000000000000000000000000000",
+  "after": "818eeb21d91d635c6b224e4619b538867b12b7e4",
+  "repository": {
+    "id": 1329613720,
+    "node_id": "R_kgDOT0BLmA",
+    "name": "file-os2",
+    "full_name": "bitwiseworks/file-os2",
+    "private": true,
+    "owner": {
+      "name": "bitwiseworks",
+      "email": null,
+      "login": "bitwiseworks",
+      "id": 1766192,
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjE3NjYxOTI=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1766192?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/bitwiseworks",
+      "html_url": "https://github.com/bitwiseworks",
+      "followers_url": "https://api.github.com/users/bitwiseworks/followers",
+      "following_url": "https://api.github.com/users/bitwiseworks/following{/other_user}",
+      "gists_url": "https://api.github.com/users/bitwiseworks/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/bitwiseworks/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/bitwiseworks/subscriptions",
+      "organizations_url": "https://api.github.com/users/bitwiseworks/orgs",
+      "repos_url": "https://api.github.com/users/bitwiseworks/repos",
+      "events_url": "https://api.github.com/users/bitwiseworks/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/bitwiseworks/received_events",
+      "type": "Organization",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "html_url": "https://github.com/bitwiseworks/file-os2",
+    "description": null,
+    "fork": false,
+    "url": "https://api.github.com/repos/bitwiseworks/file-os2",
+    "forks_url": "https://api.github.com/repos/bitwiseworks/file-os2/forks",
+    "keys_url": "https://api.github.com/repos/bitwiseworks/file-os2/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/bitwiseworks/file-os2/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/bitwiseworks/file-os2/teams",
+    "hooks_url": "https://api.github.com/repos/bitwiseworks/file-os2/hooks",
+    "issue_events_url": "https://api.github.com/repos/bitwiseworks/file-os2/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/bitwiseworks/file-os2/events",
+    "assignees_url": "https://api.github.com/repos/bitwiseworks/file-os2/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/bitwiseworks/file-os2/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/bitwiseworks/file-os2/tags",
+    "blobs_url": "https://api.github.com/repos/bitwiseworks/file-os2/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/bitwiseworks/file-os2/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/bitwiseworks/file-os2/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/bitwiseworks/file-os2/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/bitwiseworks/file-os2/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/bitwiseworks/file-os2/languages",
+    "stargazers_url": "https://api.github.com/repos/bitwiseworks/file-os2/stargazers",
+    "contributors_url": "https://api.github.com/repos/bitwiseworks/file-os2/contributors",
+    "subscribers_url": "https://api.github.com/repos/bitwiseworks/file-os2/subscribers",
+    "subscription_url": "https://api.github.com/repos/bitwiseworks/file-os2/subscription",
+    "commits_url": "https://api.github.com/repos/bitwiseworks/file-os2/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/bitwiseworks/file-os2/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/bitwiseworks/file-os2/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/bitwiseworks/file-os2/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/bitwiseworks/file-os2/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/bitwiseworks/file-os2/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/bitwiseworks/file-os2/merges",
+    "archive_url": "https://api.github.com/repos/bitwiseworks/file-os2/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/bitwiseworks/file-os2/downloads",
+    "issues_url": "https://api.github.com/repos/bitwiseworks/file-os2/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/bitwiseworks/file-os2/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/bitwiseworks/file-os2/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/bitwiseworks/file-os2/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/bitwiseworks/file-os2/labels{/name}",
+    "releases_url": "https://api.github.com/repos/bitwiseworks/file-os2/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/bitwiseworks/file-os2/deployments",
+    "created_at": 1786351730,
+    "updated_at": "2026-08-10T08:48:51Z",
+    "pushed_at": 1786351872,
+    "git_url": "git://github.com/bitwiseworks/file-os2.git",
+    "ssh_url": "git@github.com:bitwiseworks/file-os2.git",
+    "clone_url": "https://github.com/bitwiseworks/file-os2.git",
+    "svn_url": "https://github.com/bitwiseworks/file-os2",
+    "homepage": null,
+    "size": 0,
+    "stargazers_count": 0,
+    "watchers_count": 0,
+    "language": null,
+    "has_issues": true,
+    "has_projects": true,
+    "has_downloads": true,
+    "has_wiki": false,
+    "has_pages": false,
+    "has_discussions": false,
+    "forks_count": 0,
+    "mirror_url": null,
+    "archived": false,
+    "disabled": false,
+    "open_issues_count": 0,
+    "license": null,
+    "allow_forking": false,
+    "is_template": false,
+    "web_commit_signoff_required": false,
+    "has_pull_requests": true,
+    "pull_request_creation_policy": "all",
+    "topics": [
+
+    ],
+    "visibility": "private",
+    "forks": 0,
+    "open_issues": 0,
+    "watchers": 0,
+    "default_branch": "main",
+    "stargazers": 0,
+    "master_branch": "main",
+    "organization": "bitwiseworks",
+    "custom_properties": {
+
+    }
+  },
+  "pusher": {
+    "name": "SilvanScherrer",
+    "email": "silvan.scherrer@aroa.ch"
+  },
+  "forced": false,
+  "organization": {
+    "login": "bitwiseworks",
+    "id": 1766192,
+    "node_id": "MDEyOk9yZ2FuaXphdGlvbjE3NjYxOTI=",
+    "url": "https://api.github.com/orgs/bitwiseworks",
+    "repos_url": "https://api.github.com/orgs/bitwiseworks/repos",
+    "events_url": "https://api.github.com/orgs/bitwiseworks/events",
+    "hooks_url": "https://api.github.com/orgs/bitwiseworks/hooks",
+    "issues_url": "https://api.github.com/orgs/bitwiseworks/issues",
+    "members_url": "https://api.github.com/orgs/bitwiseworks/members{/member}",
+    "public_members_url": "https://api.github.com/orgs/bitwiseworks/public_members{/member}",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1766192?v=4",
+    "description": null
+  },
+  "sender": {
+    "login": "SilvanScherrer",
+    "id": 1235738,
+    "node_id": "MDQ6VXNlcjEyMzU3Mzg=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1235738?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/SilvanScherrer",
+    "html_url": "https://github.com/SilvanScherrer",
+    "followers_url": "https://api.github.com/users/SilvanScherrer/followers",
+    "following_url": "https://api.github.com/users/SilvanScherrer/following{/other_user}",
+    "gists_url": "https://api.github.com/users/SilvanScherrer/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/SilvanScherrer/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/SilvanScherrer/subscriptions",
+    "organizations_url": "https://api.github.com/users/SilvanScherrer/orgs",
+    "repos_url": "https://api.github.com/users/SilvanScherrer/repos",
+    "events_url": "https://api.github.com/users/SilvanScherrer/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/SilvanScherrer/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "created": true,
+  "deleted": false,
+  "base_ref": null,
+  "compare": "https://github.com/bitwiseworks/file-os2/compare/05a933d6f49b^...818eeb21d91d",
+  "commits": [
+    {
+      "id": "05a933d6f49bc67be49ffc0c7a574605953068f8",
+      "tree_id": "975fecc389207682ddd297dc7f758b2c3e62fc0f",
+      "distinct": true,
+      "message": "file: copy vendor current to trunk.",
+      "timestamp": "2010-09-27T21:55:56Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/05a933d6f49bc67be49ffc0c7a574605953068f8",
+      "author": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2010-09-27T21:55:56Z",
+        "username": "ydario"
+      },
+      "committer": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2010-09-27T21:55:56Z",
+        "username": "ydario"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+
+      ]
+    },
+    {
+      "id": "16951836e01c3cd0fb32308340ad8f2d89994af6",
+      "tree_id": "ff9ecbfcddd8c6fbf7d3cd5e3c44e2beab9148f3",
+      "distinct": true,
+      "message": "file: applied os2 patches.",
+      "timestamp": "2010-09-27T21:57:01Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/16951836e01c3cd0fb32308340ad8f2d89994af6",
+      "author": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2010-09-27T21:57:01Z",
+        "username": "ydario"
+      },
+      "committer": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2010-09-27T21:57:01Z",
+        "username": "ydario"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "doc/Makefile.am",
+        "doc/Makefile.in",
+        "magic/Makefile.am",
+        "magic/Makefile.in",
+        "src/compress.c"
+      ]
+    },
+    {
+      "id": "2815ab57a888f4ab9fc14e93fc392f18de1d387c",
+      "tree_id": "79283f6c1a8b08785c27e5a121ed9c6e0b660162",
+      "distinct": true,
+      "message": "file: build as dll, build python module, enable mmap access.",
+      "timestamp": "2010-11-18T16:57:54Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/2815ab57a888f4ab9fc14e93fc392f18de1d387c",
+      "author": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2010-11-18T16:57:54Z",
+        "username": "ydario"
+      },
+      "committer": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2010-11-18T16:57:54Z",
+        "username": "ydario"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "python/setup.py",
+        "src/Makefile.in",
+        "src/apprentice.c"
+      ]
+    },
+    {
+      "id": "1d4f9fad71f7a1cd5813d45aafa791dbbca03616",
+      "tree_id": "d6bc87906a3d3ae3ca8fa003654b14ae2c2ad235",
+      "distinct": true,
+      "message": "file: newer mmap fixes file handle closing.",
+      "timestamp": "2011-01-03T17:58:13Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/1d4f9fad71f7a1cd5813d45aafa791dbbca03616",
+      "author": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2011-01-03T17:58:13Z",
+        "username": "ydario"
+      },
+      "committer": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2011-01-03T17:58:13Z",
+        "username": "ydario"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "src/apprentice.c"
+      ]
+    },
+    {
+      "id": "b24c9736a7b5cf6d291f4e4165e7a90536d53166",
+      "tree_id": "a231cd0a8d451204523f5ffdfb090aa82dd20820",
+      "distinct": true,
+      "message": "file: disable forking code, crashes if invoked from dll.",
+      "timestamp": "2011-01-04T11:51:58Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/b24c9736a7b5cf6d291f4e4165e7a90536d53166",
+      "author": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2011-01-04T11:51:58Z",
+        "username": "ydario"
+      },
+      "committer": {
+        "name": "Yuri Dario",
+        "email": "yd@os2power.com",
+        "date": "2011-01-04T11:51:58Z",
+        "username": "ydario"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "src/compress.c"
+      ]
+    },
+    {
+      "id": "6f22599909e6d5f13d0efebcd824a9c25294248c",
+      "tree_id": "39a6ea3bc4333054df51179ddc7226e4d694973d",
+      "distinct": true,
+      "message": "file: remove some old and ugly hacks",
+      "timestamp": "2017-03-03T15:59:44Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/6f22599909e6d5f13d0efebcd824a9c25294248c",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-03T15:59:44Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-03T15:59:44Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+        "INSTALL",
+        "Makefile.in",
+        "aclocal.m4",
+        "compile",
+        "config.guess",
+        "config.h.in",
+        "config.sub",
+        "configure",
+        "depcomp",
+        "doc/Makefile.in",
+        "install-sh",
+        "ltmain.sh",
+        "magic/Makefile.in",
+        "missing",
+        "python/Makefile.in",
+        "src/Makefile.in",
+        "tests/Makefile.in"
+      ],
+      "modified": [
+        "doc/Makefile.am",
+        "src/compress.c"
+      ]
+    },
+    {
+      "id": "aaac6dced73883c62823932fe98f848a8773752a",
+      "tree_id": "76cc629f25a95262511bad90589a225e22ec9144",
+      "distinct": true,
+      "message": "file: some more changes to get it build",
+      "timestamp": "2017-03-03T16:24:34Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/aaac6dced73883c62823932fe98f848a8773752a",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-03T16:24:34Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-03T16:24:34Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "doc/Makefile.am",
+        "src/apprentice.c",
+        "src/cdf.c",
+        "src/compress.c",
+        "src/file.c",
+        "tests/test.c"
+      ]
+    },
+    {
+      "id": "aca54c223ee22929a8574141643b9a479954c7b9",
+      "tree_id": "f30ee08db71bd96e0b30829a44438a9eaf091bf2",
+      "distinct": true,
+      "message": "file: update trunk to vendor version 5.30",
+      "timestamp": "2017-03-04T18:58:11Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/aca54c223ee22929a8574141643b9a479954c7b9",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-04T18:58:11Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-04T18:58:11Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+        "m4/libtool.m4",
+        "m4/ltoptions.m4",
+        "m4/ltsugar.m4",
+        "m4/ltversion.m4",
+        "m4/lt~obsolete.m4",
+        "magic/Magdir/algol68",
+        "magic/Magdir/android",
+        "magic/Magdir/aout",
+        "magic/Magdir/application",
+        "magic/Magdir/apt",
+        "magic/Magdir/assembler",
+        "magic/Magdir/ber",
+        "magic/Magdir/bioinformatics",
+        "magic/Magdir/blackberry",
+        "magic/Magdir/blcr",
+        "magic/Magdir/bsi",
+        "magic/Magdir/cbor",
+        "magic/Magdir/coff",
+        "magic/Magdir/coverage",
+        "magic/Magdir/ctf",
+        "magic/Magdir/cubemap",
+        "magic/Magdir/cups",
+        "magic/Magdir/der",
+        "magic/Magdir/ebml",
+        "magic/Magdir/finger",
+        "magic/Magdir/flif",
+        "magic/Magdir/fusecompress",
+        "magic/Magdir/geo",
+        "magic/Magdir/gnome",
+        "magic/Magdir/gpt",
+        "magic/Magdir/gpu",
+        "magic/Magdir/guile",
+        "magic/Magdir/icc",
+        "magic/Magdir/isz",
+        "magic/Magdir/javascript",
+        "magic/Magdir/keepass",
+        "magic/Magdir/kerberos",
+        "magic/Magdir/m4",
+        "magic/Magdir/macos",
+        "magic/Magdir/make",
+        "magic/Magdir/map",
+        "magic/Magdir/marc21",
+        "magic/Magdir/metastore",
+        "magic/Magdir/meteorological",
+        "magic/Magdir/microfocus",
+        "magic/Magdir/msooxml",
+        "magic/Magdir/msx",
+        "magic/Magdir/music",
+        "magic/Magdir/nasa",
+        "magic/Magdir/neko",
+        "magic/Magdir/oasis",
+        "magic/Magdir/parrot",
+        "magic/Magdir/pascal",
+        "magic/Magdir/pbf",
+        "magic/Magdir/pc88",
+        "magic/Magdir/pc98",
+        "magic/Magdir/pgf",
+        "magic/Magdir/polyml",
+        "magic/Magdir/psl",
+        "magic/Magdir/pwsafe",
+        "magic/Magdir/qt",
+        "magic/Magdir/selinux",
+        "magic/Magdir/sereal",
+        "magic/Magdir/sisu",
+        "magic/Magdir/smile",
+        "magic/Magdir/ssh",
+        "magic/Magdir/ssl",
+        "magic/Magdir/symbos",
+        "magic/Magdir/tcl",
+        "magic/Magdir/uterus",
+        "magic/Magdir/vacuum-cleaner",
+        "magic/Magdir/wsdl",
+        "magic/Magdir/x68000",
+        "magic/Magdir/yara",
+        "magic/Magdir/zfs",
+        "python/magic.py",
+        "src/asctime_r.c",
+        "src/ctime_r.c",
+        "src/der.c",
+        "src/der.h",
+        "src/dprintf.c",
+        "src/fmtcheck.c",
+        "src/getline.c",
+        "src/gmtime_r.c",
+        "src/localtime_r.c",
+        "src/magic.h.in",
+        "src/pread.c",
+        "src/strcasestr.c",
+        "tests/escapevel.result",
+        "tests/escapevel.testfile",
+        "tests/issue311docx.result",
+        "tests/issue311docx.testfile"
+      ],
+      "removed": [
+        "magic/Magdir/alpha",
+        "magic/Magdir/gnome-keyring",
+        "python/py_magic.c",
+        "python/py_magic.h",
+        "src/magic.h",
+        "src/names.h",
+        "src/patchlevel.h",
+        "tests/gedcom.magic"
+      ],
+      "modified": [
+        "ChangeLog",
+        "Makefile.am",
+        "README",
+        "TODO",
+        "acinclude.m4",
+        "configure.ac",
+        "doc/file.man",
+        "doc/libmagic.man",
+        "doc/magic.man",
+        "magic/Header",
+        "magic/Magdir/adventure",
+        "magic/Magdir/amigaos",
+        "magic/Magdir/animation",
+        "magic/Magdir/apple",
+        "magic/Magdir/archive",
+        "magic/Magdir/att3b",
+        "magic/Magdir/audio",
+        "magic/Magdir/bflt",
+        "magic/Magdir/blender",
+        "magic/Magdir/bsdi",
+        "magic/Magdir/c-lang",
+        "magic/Magdir/c64",
+        "magic/Magdir/cad",
+        "magic/Magdir/cafebabe",
+        "magic/Magdir/chord",
+        "magic/Magdir/clarion",
+        "magic/Magdir/claris",
+        "magic/Magdir/clipper",
+        "magic/Magdir/commands",
+        "magic/Magdir/compress",
+        "magic/Magdir/console",
+        "magic/Magdir/convex",
+        "magic/Magdir/database",
+        "magic/Magdir/diff",
+        "magic/Magdir/digital",
+        "magic/Magdir/dolby",
+        "magic/Magdir/dump",
+        "magic/Magdir/dyadic",
+        "magic/Magdir/editors",
+        "magic/Magdir/efi",
+        "magic/Magdir/elf",
+        "magic/Magdir/encore",
+        "magic/Magdir/epoc",
+        "magic/Magdir/erlang",
+        "magic/Magdir/filesystems",
+        "magic/Magdir/flash",
+        "magic/Magdir/fonts",
+        "magic/Magdir/fortran",
+        "magic/Magdir/frame",
+        "magic/Magdir/fsav",
+        "magic/Magdir/games",
+        "magic/Magdir/gcc",
+        "magic/Magdir/gimp",
+        "magic/Magdir/gnu",
+        "magic/Magdir/graphviz",
+        "magic/Magdir/hitachi-sh",
+        "magic/Magdir/hp",
+        "magic/Magdir/ibm370",
+        "magic/Magdir/ibm6000",
+        "magic/Magdir/iff",
+        "magic/Magdir/images",
+        "magic/Magdir/intel",
+        "magic/Magdir/java",
+        "magic/Magdir/jpeg",
+        "magic/Magdir/karma",
+        "magic/Magdir/kde",
+        "magic/Magdir/kml",
+        "magic/Magdir/linux",
+        "magic/Magdir/lisp",
+        "magic/Magdir/llvm",
+        "magic/Magdir/lua",
+        "magic/Magdir/mach",
+        "magic/Magdir/macintosh",
+        "magic/Magdir/magic",
+        "magic/Magdir/mail.news",
+        "magic/Magdir/maple",
+        "magic/Magdir/mathematica",
+        "magic/Magdir/matroska",
+        "magic/Magdir/mime",
+        "magic/Magdir/mips",
+        "magic/Magdir/misctools",
+        "magic/Magdir/modem",
+        "magic/Magdir/motorola",
+        "magic/Magdir/mozilla",
+        "magic/Magdir/msdos",
+        "magic/Magdir/msvc",
+        "magic/Magdir/natinst",
+        "magic/Magdir/ncr",
+        "magic/Magdir/netbsd",
+        "magic/Magdir/netscape",
+        "magic/Magdir/nitpicker",
+        "magic/Magdir/ocaml",
+        "magic/Magdir/os2",
+        "magic/Magdir/os9",
+        "magic/Magdir/palm",
+        "magic/Magdir/pdf",
+        "magic/Magdir/pdp",
+        "magic/Magdir/perl",
+        "magic/Magdir/pgp",
+        "magic/Magdir/printer",
+        "magic/Magdir/psdbms",
+        "magic/Magdir/python",
+        "magic/Magdir/revision",
+        "magic/Magdir/riff",
+        "magic/Magdir/rpm",
+        "magic/Magdir/ruby",
+        "magic/Magdir/scientific",
+        "magic/Magdir/sendmail",
+        "magic/Magdir/sequent",
+        "magic/Magdir/sgi",
+        "magic/Magdir/sgml",
+        "magic/Magdir/sharc",
+        "magic/Magdir/sinclair",
+        "magic/Magdir/sniffer",
+        "magic/Magdir/spectrum",
+        "magic/Magdir/sql",
+        "magic/Magdir/sun",
+        "magic/Magdir/sysex",
+        "magic/Magdir/terminfo",
+        "magic/Magdir/tex",
+        "magic/Magdir/tgif",
+        "magic/Magdir/ti-8x",
+        "magic/Magdir/troff",
+        "magic/Magdir/unicode",
+        "magic/Magdir/unknown",
+        "magic/Magdir/varied.out",
+        "magic/Magdir/varied.script",
+        "magic/Magdir/vax",
+        "magic/Magdir/virtual",
+        "magic/Magdir/vms",
+        "magic/Magdir/vorbis",
+        "magic/Magdir/warc",
+        "magic/Magdir/windows",
+        "magic/Magdir/wordprocessors",
+        "magic/Magdir/xdelta",
+        "magic/Magdir/xenix",
+        "magic/Magdir/xilinx",
+        "magic/Magdir/xwindows",
+        "magic/Makefile.am",
+        "python/Makefile.am",
+        "python/README",
+        "python/example.py",
+        "python/setup.py",
+        "src/Makefile.am",
+        "src/apprentice.c",
+        "src/apptype.c",
+        "src/ascmagic.c",
+        "src/asprintf.c",
+        "src/cdf.c",
+        "src/cdf.h",
+        "src/cdf_time.c",
+        "src/compress.c",
+        "src/elfclass.h",
+        "src/encoding.c",
+        "src/file.c",
+        "src/file.h",
+        "src/file_opts.h",
+        "src/fsmagic.c",
+        "src/funcs.c",
+        "src/is_tar.c",
+        "src/magic.c",
+        "src/print.c",
+        "src/readcdf.c",
+        "src/readelf.c",
+        "src/readelf.h",
+        "src/softmagic.c",
+        "src/tar.h",
+        "src/vasprintf.c",
+        "tests/Makefile.am",
+        "tests/README",
+        "tests/gedcom.result"
+      ]
+    },
+    {
+      "id": "1278c43628853559536c94acd27145ce5dddc860",
+      "tree_id": "32f3e12773b23f23ee257102356ee8da734ce228",
+      "distinct": true,
+      "message": "file: add 2 upstream fixes and adapt os/2 part to win equivalent",
+      "timestamp": "2017-03-04T19:56:21Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/1278c43628853559536c94acd27145ce5dddc860",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-04T19:56:21Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-04T19:56:21Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+        "m4/libtool.m4",
+        "m4/ltoptions.m4",
+        "m4/ltsugar.m4",
+        "m4/ltversion.m4",
+        "m4/lt~obsolete.m4"
+      ],
+      "modified": [
+        "src/magic.c",
+        "src/readelf.c"
+      ]
+    },
+    {
+      "id": "0a036c5a0aa6967ced859ac5e9b01e5e0e5f022e",
+      "tree_id": "fb33f13bc7a9177c01f458b5690ce3bd8a6a1fa2",
+      "distinct": true,
+      "message": "file: change setup.py to run w/o setuptools",
+      "timestamp": "2017-03-04T20:02:29Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/0a036c5a0aa6967ced859ac5e9b01e5e0e5f022e",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-04T20:02:29Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-04T20:02:29Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "python/setup.py"
+      ]
+    },
+    {
+      "id": "bbe47274bd166eaa16bb58ce6fa1572cf1a42350",
+      "tree_id": "53db51960ffcad0507e192cdd32965a912da689a",
+      "distinct": true,
+      "message": "magic: fix generation of man files",
+      "timestamp": "2017-03-17T14:57:12Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/bbe47274bd166eaa16bb58ce6fa1572cf1a42350",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-17T14:57:12Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-17T14:57:12Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "doc/Makefile.am"
+      ]
+    },
+    {
+      "id": "cf440b2b88877548c4d0fa6865260f862fe3804e",
+      "tree_id": "3c38adff0ca3331bb16883a58c65c5266eaa5dbc",
+      "distinct": true,
+      "message": "magic: add a @todo to a possible not needed fix",
+      "timestamp": "2017-03-17T14:58:38Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/cf440b2b88877548c4d0fa6865260f862fe3804e",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-17T14:58:38Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-17T14:58:38Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "src/compress.c"
+      ]
+    },
+    {
+      "id": "dccd8908b3ad44ddc4df488f8303e2abadfb31e0",
+      "tree_id": "5caff8fe782922792fefc7e70ba41eae84447ebe",
+      "distinct": true,
+      "message": "magic: disable mmap for now",
+      "timestamp": "2017-03-17T15:18:53Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/dccd8908b3ad44ddc4df488f8303e2abadfb31e0",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-17T15:18:53Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-03-17T15:18:53Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "configure.ac"
+      ]
+    },
+    {
+      "id": "cc6cf1d4f6198e00522b0765743eabfea0cf189e",
+      "tree_id": "3b478d87af5e4d323dbf56702bc47bd5767810cc",
+      "distinct": true,
+      "message": "file: fix a not working regex with libc regex. This needs to be rolled back, when either libc ticket 375 or libcx issue 35 is done.",
+      "timestamp": "2017-04-05T16:17:50Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/cc6cf1d4f6198e00522b0765743eabfea0cf189e",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-04-05T16:17:50Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-04-05T16:17:50Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "magic/Magdir/bioinformatics"
+      ]
+    },
+    {
+      "id": "49e56d0576a519e41d54d0c235d486bebf1cf823",
+      "tree_id": "22558c2839b004a5aa6a0a71f2ffce08747126be",
+      "distinct": true,
+      "message": "file: add buildlevel info",
+      "timestamp": "2017-04-05T16:37:31Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/49e56d0576a519e41d54d0c235d486bebf1cf823",
+      "author": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-04-05T16:37:31Z",
+        "username": "SilvanScherrer"
+      },
+      "committer": {
+        "name": "Silvan Scherrer",
+        "email": "silvan.scherrer@aroa.ch",
+        "date": "2017-04-05T16:37:31Z",
+        "username": "SilvanScherrer"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "src/Makefile.am"
+      ]
+    },
+    {
+      "id": "818eeb21d91d635c6b224e4619b538867b12b7e4",
+      "tree_id": "1b40fcb5556b49dfa1eb2f91689ec5c2078cd8d0",
+      "distinct": true,
+      "message": "file: Fix compiler warning on OS/2.",
+      "timestamp": "2017-04-05T19:44:29Z",
+      "url": "https://github.com/bitwiseworks/file-os2/commit/818eeb21d91d635c6b224e4619b538867b12b7e4",
+      "author": {
+        "name": "Dmitriy Kuminov",
+        "email": "coding@dmik.org",
+        "date": "2017-04-05T19:44:29Z",
+        "username": "dmik"
+      },
+      "committer": {
+        "name": "Dmitriy Kuminov",
+        "email": "coding@dmik.org",
+        "date": "2017-04-05T19:44:29Z",
+        "username": "dmik"
+      },
+      "added": [
+
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "src/magic.c"
+      ]
+    }
+  ],
+  "head_commit": {
+    "id": "818eeb21d91d635c6b224e4619b538867b12b7e4",
+    "tree_id": "1b40fcb5556b49dfa1eb2f91689ec5c2078cd8d0",
+    "distinct": true,
+    "message": "file: Fix compiler warning on OS/2.",
+    "timestamp": "2017-04-05T19:44:29Z",
+    "url": "https://github.com/bitwiseworks/file-os2/commit/818eeb21d91d635c6b224e4619b538867b12b7e4",
+    "author": {
+      "name": "Dmitriy Kuminov",
+      "email": "coding@dmik.org",
+      "date": "2017-04-05T19:44:29Z",
+      "username": "dmik"
+    },
+    "committer": {
+      "name": "Dmitriy Kuminov",
+      "email": "coding@dmik.org",
+      "date": "2017-04-05T19:44:29Z",
+      "username": "dmik"
+    },
+    "added": [
+
+    ],
+    "removed": [
+
+    ],
+    "modified": [
+      "src/magic.c"
+    ]
+  }
+}
