@@ -97,7 +97,7 @@ describe ('webhook', () =>
 
   it ('reacts to an organization webhook ping', () =>
   {
-    const [ message ] = formatGitHubEvent ('ping',
+    const message = formatGitHubEvent ('ping',
     {
       organization:
       {
@@ -105,15 +105,23 @@ describe ('webhook', () =>
         url: 'https://api.github.com/orgs/acme',
       },
     });
-    expect (message).toContain ('connected');
-    expect (message).toContain ('<a href="https://github.com/acme">acme</a>');
+    expect (message).not.toBe (undefined);
+    if (message)
+    {
+      expect (message [0]).toContain ('connected');
+      expect (message [0]).toContain ('<a href="https://github.com/acme">acme</a>');
+    }
   });
 
   it ('reacts to an unsupported webhook ping', () =>
   {
-    const [ message ] = formatGitHubEvent ('ping', {});
-    expect (message).toContain ('connected');
-    expect (message).toContain ('Unsupported resource');
+    const message = formatGitHubEvent ('ping', {});
+    expect (message).not.toBe (undefined);
+    if (message)
+    {
+      expect (message [0]).toContain ('connected');
+      expect (message [0]).toContain ('Unsupported resource');
+    }
   });
 });
 
@@ -146,16 +154,20 @@ describe ('message formatting', () =>
 
   it ('escapes untrusted HTML', () =>
   {
-    const [ message ] = formatGitHubEvent ('issues',
+    const message = formatGitHubEvent ('issues',
     {
       action: 'opened',
       sender: { login: '<admin>' },
       repository: { full_name: 'acme/app' },
       issue: { number: 1, title: 'Fix <script>', html_url: 'https://github.com/acme/app/issues/1' },
     });
-    expect (message).toContain ('&lt;admin&gt;');
-    expect (message).toContain ('Fix &lt;script&gt;');
-    expect (message).not.toContain ('<script>');
+    expect (message).not.toBe (undefined);
+    if (message)
+    {
+      expect (message [0]).toContain ('&lt;admin&gt;');
+      expect (message [0]).toContain ('Fix &lt;script&gt;');
+      expect (message [0]).not.toContain ('<script>');
+    }
   });
 
   it ('preserves Telegram entities across long-message chunks', () =>
@@ -177,5 +189,14 @@ describe ('message formatting', () =>
         { text: `${'x'.repeat (4095)}&`, entities: [] },
         { text: 'y', entities: [] },
       ]);
+  });
+
+  it ('ignores unsupported event types', () =>
+  {
+    for (const event of [ 'create', 'delete' ])
+    {
+      const message = formatGitHubEvent (event, {});
+      expect (message).toBe (undefined);
+    }
   });
 });

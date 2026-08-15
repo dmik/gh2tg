@@ -85,16 +85,21 @@ async function main (): Promise <void>
       const payload = JSON.parse (await readFile (join (FIXTURES_DIR, event, file), 'utf8')) as GitHubPayload;
       const message = formatGitHubEvent (event, payload);
 
-      console.log (`\n${message [0]}\n\nOptions: ${JSON.stringify (message [1])}\n`);
-
-      await sendMessage (message,
+      if (message)
       {
-        GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET ?? '',
-        TELEGRAM_BOT_TOKEN: token,
-        TELEGRAM_CHAT_ID: chatId,
-      });
+        console.log (`\n${message [0]}\n\nOptions: ${JSON.stringify (message [1])}\n`);
 
-      console.log (`Sent '${event}/${file}' to Telegram.`);
+        await sendMessage (message,
+        {
+          GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET ?? '',
+          TELEGRAM_BOT_TOKEN: token,
+          TELEGRAM_CHAT_ID: chatId,
+        });
+
+        console.log (`Sent '${event}/${file}' to Telegram.`);
+      }
+      else
+        console.log (`\nIgnoring '${event}/${file}'; didn't produce a message.`);
     }
   }
 }

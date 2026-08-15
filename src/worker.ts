@@ -48,7 +48,9 @@ export async function handleRequest (request_: Request, env_: Env): Promise <Res
 
   try
   {
-    await sendMessage (formatGitHubEvent (event, payload), env_);
+    const message = formatGitHubEvent (event, payload);
+    if (message)
+      await sendMessage (message, env_);
     return json ({ ok: true, event, delivery });
   }
   catch (error)

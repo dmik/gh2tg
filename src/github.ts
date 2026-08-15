@@ -141,7 +141,7 @@ function getSenderLabel (payload_: GitHubPayload): string
 }
 
 
-export function formatGitHubEvent (event_: string, payload_: GitHubPayload): SendMessage
+export function formatGitHubEvent (event_: string, payload_: GitHubPayload): SendMessage | undefined
 {
   const action = escapeHtml (payload_.action ?? 'did something with');
   const [ resName, resType, resUrl ] = getResource (payload_);
@@ -209,6 +209,12 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
 
     case 'fork':
       return [ `🍴 ${sender} forked ${resName} as ${getRepoLabel (getObject (payload_, 'forkee'))}` ];
+
+    case 'create':
+    case 'delete':
+      // Create/delete events are for branch/tag only, but for those GitHub always delivers richer
+      // push events too; ignore them to avoid duplicates for the same logical action.
+      return;
 
     default:
       return [ `🔔 ${sender} ${action} ${escapeHtml (event_)} in ${resName}` ];
