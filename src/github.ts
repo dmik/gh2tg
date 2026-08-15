@@ -39,6 +39,12 @@ function commitRangeLink (label_: unknown, url_: unknown, from_: unknown, to_: u
 }
 
 
+function repoLink (name_: unknown, url_: unknown, ownerName_: unknown, ownerUrl_: unknown): string
+{
+  return `${link (ownerName_, ownerUrl_)} / ${boldLink (name_, url_)}`;
+}
+
+
 function code (text_: string): string
 {
   return `<code>${escapeHtml (text_)}</code>`;
@@ -67,6 +73,13 @@ function get (payload_: GitHubPayload, path_: string): unknown
 }
 
 
+function getObject (payload_: GitHubPayload, path_: string): UnknownObject
+{
+  const value = get (payload_, path_);
+  return value && typeof value === 'object' ? value as UnknownObject : {};
+}
+
+
 function getFirst (payload_: GitHubPayload, paths_: string): unknown
 {
   for (const path of paths_.split ('|'))
@@ -79,21 +92,29 @@ function getFirst (payload_: GitHubPayload, paths_: string): unknown
 }
 
 
+function getOrgHtmlUrl (payload_: GitHubPayload): string
+{
+  // No 'organization.html_url' in payload, adjust API URL (works for github.com only)
+  return (get (payload_, 'organization.url') as string)?.replace ('//api.github.com/orgs/', '//github.com/');
+}
+
 function getResource (payload_: GitHubPayload): [ string, string, unknown ]
 {
   let name, type, url;
 
-  if (name = get (payload_, 'repository.full_name'))
+  if (name = get (payload_, 'repository.name'))
   {
     const isPrivate = get (payload_, 'repository.private');
     type = `${isPrivate ? 'private' : 'public'} repository`;
     url = get (payload_, 'repository.html_url');
+
+    const owner = getObject (payload_, 'repository.owner');
+    return [ repoLink (name, url, getFirst (owner, 'name|login'), get (owner, 'html_url')), type, url ];
   }
   else if (name = get (payload_, 'organization.login'))
   {
-    // NOTE: No 'organization.html_url' in payload, adjust API URL (works for github.com only)
     type = 'organization';
-    url = (get (payload_, 'organization.url') as string)?.replace ('//api.github.com/orgs/', '//github.com/');
+    url = getOrgHtmlUrl (payload_);
   }
   else
   {
@@ -105,7 +126,13 @@ function getResource (payload_: GitHubPayload): [ string, string, unknown ]
 }
 
 
-function getSender (payload_: GitHubPayload): string
+function getRepoLabel (repo_: UnknownObject)
+{
+  return repoLink (repo_.name, repo_.html_url, getFirst (repo_, 'owner.name|owner.login'), get (repo_, 'owner.html_url'));
+}
+
+
+function getSenderLabel (payload_: GitHubPayload): string
 {
   const sender = get (payload_, 'sender.login');
   if (! sender)
@@ -118,7 +145,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
 {
   const action = escapeHtml (payload_.action ?? 'did something with');
   const [ resName, resType, resUrl ] = getResource (payload_);
-  const sender = getSender (payload_);
+  const sender = getSenderLabel (payload_);
 
   switch (event_)
   {
@@ -181,7 +208,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       return [ `⭐ ${sender} ${action} a star on ${resName}` ];
 
     case 'fork':
-      return [ `🍴 ${sender} forked ${resName} as ${boldLink (get (payload_, 'forkee.full_name'), get (payload_, 'forkee.html_url'))}` ];
+      return [ `🍴 ${sender} forked ${resName} as ${getRepoLabel (getObject (payload_, 'forkee'))}` ];
 
     default:
       return [ `🔔 ${sender} ${action} ${escapeHtml (event_)} in ${resName}` ];
