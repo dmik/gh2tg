@@ -23,7 +23,7 @@ function escapeHtml (value_: unknown): string
 function link (label_: unknown, url_?: unknown): string
 {
   if (! url_)
-    return `<u>${escapeHtml (label_)}</u>`;
+    return `${escapeHtml (label_)}`;
   return `<a href="${escapeHtml (url_)}">${escapeHtml (label_)}</a>`;
 }
 
@@ -33,9 +33,21 @@ function boldLink (label_: unknown, url_?: unknown): string
 }
 
 
+function commitLink (id_: unknown, url_: unknown, isRepoUrl_ = false): string
+{
+  return link (String (id_ ?? '???????').slice (0, 7), id_ ? (isRepoUrl_ ? `${url_}/commit/${id_}` : url_) : undefined);
+}
+
+
 function commitRangeLink (label_: unknown, url_: unknown, from_: unknown, to_: unknown): string
 {
-  return `${link (label_, `${url_}/compare/${from_}^...${to_}`)}`;
+  return link (label_, `${url_}/compare/${from_}^...${to_}`);
+}
+
+
+function refLink (name_: unknown, ref_: unknown, repoUrl_?: unknown): string
+{
+  return boldLink (name_, repoUrl_ ? `${repoUrl_}/tree/${ref_}` : undefined);
 }
 
 
@@ -155,10 +167,35 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
 
     case 'push':
     {
-      const branch = escapeHtml (String (payload_.ref ?? '').replace ('refs/heads/', ''));
+      const ref = String (payload_.ref ?? '');
+      const [ _, type, name ] = ref.split ('/');
+      const isCreated = !! payload_.created;
+      const isDeleted = !! payload_.deleted;
+      const label = refLink (name ?? ref, ref, isDeleted ? undefined : resUrl);
+      const commit = isDeleted ? payload_.before : payload_.after;
+      const commitLabel = commitLink (commit, resUrl, true);
+      const action = isCreated ? 'created ' : isDeleted ? 'deleted ' : '';
+      const force = !! payload_.forced ? 'force-' : '';
+
+      let subject, showCommits = ! isCreated && ! isDeleted;
+      switch (type)
+      {
+        case 'heads':
+          subject = `${action ? `${action}branch ` : ''}${label}`;
+          break;
+        case 'tags':
+          subject = `${action}tag ${label}`;
+          showCommits = false;
+          break;
+        default:
+          subject = `${action}${label}`;
+      }
+
+      if (! showCommits)
+        return [ `📦 ${sender} ${force}${subject} @ ${commitLabel} in ${resName}` ];
+
       const commits: UnknownObject [] = Array.isArray (payload_.commits) ? payload_.commits : [];
       const count = commits.length;
-      const header = `📦 ${sender} pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${code (branch)} in ${resName}`;
       let text = '';
       for (const [ i, commit ] of commits.entries ())
       {
@@ -167,13 +204,12 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           text += `\n…and ${commitRangeLink (`${count - i} more`, resUrl, commit.id, commits [count - 1].id)}`;
           break;
         }
-        const sha = String (commit.id ?? '???????').slice (0, 7);
         const message = String (commit.message ?? '');
         const nl = message.indexOf ('\n');
-        text += `\n• ${link (sha, commit.url)}: ${escapeHtml (nl < 0 ? message : message.slice (0, nl))}`;
+        text += `\n• ${commitLink (commit.id, commit.url)}: ${escapeHtml (nl < 0 ? message : message.slice (0, nl))}`;
       }
       text = text.trim ();
-      return [ header + (text ? `\n\n${expQuote (text)}` : text) ];
+      return [ `📦 ${sender} ${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject} in ${resName}` + (text ? `\n\n${expQuote (text)}` : text) ];
     }
 
     case 'issues':
