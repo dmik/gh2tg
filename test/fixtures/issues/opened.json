@@ -59,7 +59,7 @@
       "blocking": 0,
       "total_blocking": 0
     },
-    "body": "some text of the issue\n\nanother line of text\n\nformatted text:\n* this is **bold** text\n* this is `code` text\n* this is _italic_ text",
+    "body": "some text of the issue\n\nanother line of text\n\nformatted text:\n* this is **bold** text\n* this is `code` text\n* this is _italic_ text\nfile.py\n/some/path.to/file.c\npath.to/file\nt.me\nhttps://t.me\n:t.me\n@mention\na@b\ncoding@dmik.org\ncoding.2@dmik.org\n#hashtag\nnota#hashtag\n/command\nnota/command",
     "reactions": {
       "url": "https://api.github.com/repos/dmik/test/issues/1/reactions",
       "total_count": 0,

@@ -11,6 +11,7 @@
 - Show repo labels as two separate owner / repo links.
 - Ignore GitHub create and delete events.
 - Recognize branch/tag creation/deletion in GitHub push events.
+- Suppress automatic recognition of @mentions and scheme-less URLs by Telegram.
 
 ## v0.0.1 - 2026-08-10
 

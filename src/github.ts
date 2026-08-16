@@ -20,6 +20,22 @@ function escapeHtml (value_: unknown): string
 }
 
 
+function escapeAll (value_: unknown): string
+{
+  // Suppress automatic recognition of @mentions and scheme-less URLs in `sendMessage` by enclosing
+  // '.' and '@' in `<code>` to trick the Telegram parser (no clean option to disable that). This
+  // changes the font typography (to monospaced) but it's the best we can get in HTML mode (using
+  // invisible chars is a bad idea because it breaks copy-paste, searching etc.). Note that in
+  // MarkdownV2 mode, those could be simply escaped with '\', but it has its own parsing problems
+  // (e.g. putting pre blocks inside expandable block quotes is not possible)
+  return escapeHtml (value_)
+  .replaceAll (/\b[A-Za-z][A-Za-z0-9+.-]*(?::\/\/|@)[^\s<]+|(?<=[\p{L}\p{N}_])\.(?=[\p{L}\p{N}_])/gu,
+    match => match === '.' ? '<code>.</code>' : match)
+  .replaceAll (/(^|\s)([@#/])(?=[A-Za-z0-9_]+(?:\s|$))/gu,
+    '$1<code>$2</code>');
+}
+
+
 function link (label_: unknown, url_?: unknown): string
 {
   if (! url_)
@@ -65,12 +81,12 @@ function code (text_: string): string
 
 function quote (text_: string): string
 {
-  return `<blockquote>${text_}</blockquote>`;
+  return `<blockquote>${escapeAll (text_)}</blockquote>`;
 }
 
 function expQuote (text_: string): string
 {
-  return `<blockquote expandable>${text_}</blockquote>`;
+  return `<blockquote expandable>${escapeAll (text_)}</blockquote>`;
 }
 
 
