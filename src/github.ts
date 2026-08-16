@@ -160,6 +160,12 @@ function getRepoLabel (repo_: UnknownObject)
 }
 
 
+function getIssueLabel (issue_: UnknownObject, url_?: unknown)
+{
+  return `${code (`#${get (issue_, 'number')}`)} ${link (get (issue_, 'title'), url_ ?? get (issue_, 'html_url'))}`;
+}
+
+
 function getSenderLabel (payload_: GitHubPayload): string
 {
   const sender = get (payload_, 'sender.login');
@@ -229,26 +235,29 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
     }
 
     case 'issues':
+    case 'pull_request':
     {
-      const body = (action === 'opened') ? String (get (payload_, 'issue.body') ?? '').trim () : '';
+      const [ icon, object, subject ] = event_ === 'issues'
+        ? [ '📝', getObject (payload_, 'issue'), 'issue' ]
+        : [ '🔀', getObject (payload_, 'pull_request'), 'pull request' ];
+      const body = (action === 'opened') ? String (get (object, 'body') ?? '').trim () : '';
       const text = body ? `\n\n${expQuote (body)}` : body;
-      return [ `📝 ${sender} ${action} issue ${boldLink (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'issue.html_url'))} in ${resName}${text}` ];
+      return [ `${icon} ${sender} ${action} ${subject} ${getIssueLabel (object)} in ${resName}${text}` ];
     }
 
     case 'issue_comment':
     {
+      const issue = getObject (payload_, 'issue');
+      const subject = !! get (issue, 'pull_request') ? 'pull request' : 'issue';
       const [ body, actionText ] = (action === 'created')
-        ? [ String (get (payload_, 'comment.body') ?? '').trim (), 'commented on issue' ]
-        : [ '', `${action} issue comment` ];
+        ? [ String (get (payload_, 'comment.body') ?? '').trim (), `commented on ${subject}` ]
+        : [ '', `${action} ${subject} comment` ];
       const text = body ? `\n\n${expQuote (body)}` : body;
-      return [ `💬 ${sender} ${actionText} ${boldLink (`#${get (payload_, 'issue.number')} ${get (payload_, 'issue.title')}`, get (payload_, 'comment.html_url'))} in ${resName}${text}` ];
+      return [ `💬 ${sender} ${actionText} ${getIssueLabel (issue, get (payload_, 'comment.html_url'))} in ${resName}${text}` ];
     }
 
-    case 'pull_request':
-      return [ `🔀 ${sender} ${action} pull request ${boldLink (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'pull_request.html_url'))} in ${resName}` ];
-
     case 'pull_request_review':
-      return [ `👀 ${sender} ${action} pull request review ${boldLink (`#${get (payload_, 'pull_request.number')} ${get (payload_, 'pull_request.title')}`, get (payload_, 'review.html_url'))} in ${resName}` ];
+      return [ `👀 ${sender} ${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))} in ${resName}` ];
 
     case 'release':
       return [ `🚀 ${sender} ${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))} in ${resName}` ];
