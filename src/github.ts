@@ -81,12 +81,12 @@ function code (text_: string): string
 
 function quote (text_: string): string
 {
-  return `<blockquote>${escapeAll (text_)}</blockquote>`;
+  return `<blockquote>${text_}</blockquote>`;
 }
 
 function expQuote (text_: string): string
 {
-  return `<blockquote expandable>${escapeAll (text_)}</blockquote>`;
+  return `<blockquote expandable>${text_}</blockquote>`;
 }
 
 
@@ -228,7 +228,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
         }
         const message = String (commit.message ?? '');
         const nl = message.indexOf ('\n');
-        text += `\n• ${commitLink (commit.id, commit.url)}: ${escapeHtml (nl < 0 ? message : message.slice (0, nl))}`;
+        text += `\n• ${commitLink (commit.id, commit.url)}: ${escapeAll (nl < 0 ? message : message.slice (0, nl))}`;
       }
       text = text.trim ();
       return [ `📦 ${sender} ${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject} in ${resName}` + (text ? `\n\n${expQuote (text)}` : text) ];
@@ -241,7 +241,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
         ? [ '📝', getObject (payload_, 'issue'), 'issue' ]
         : [ '🔀', getObject (payload_, 'pull_request'), 'pull request' ];
       const body = (action === 'opened') ? String (get (object, 'body') ?? '').trim () : '';
-      const text = body ? `\n\n${expQuote (body)}` : body;
+      const text = body ? `\n\n${expQuote (escapeAll (body))}` : body;
       return [ `${icon} ${sender} ${action} ${subject} ${getIssueLabel (object)} in ${resName}${text}` ];
     }
 
@@ -252,7 +252,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const [ body, actionText ] = (action === 'created')
         ? [ String (get (payload_, 'comment.body') ?? '').trim (), `commented on ${subject}` ]
         : [ '', `${action} ${subject} comment` ];
-      const text = body ? `\n\n${expQuote (body)}` : body;
+      const text = body ? `\n\n${expQuote (escapeAll (body))}` : body;
       return [ `💬 ${sender} ${actionText} ${getIssueLabel (issue, get (payload_, 'comment.html_url'))} in ${resName}${text}` ];
     }
 
