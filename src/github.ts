@@ -22,17 +22,29 @@ function escapeHtml (value_: unknown): string
 
 function escapeAll (value_: unknown): string
 {
-  // Suppress automatic recognition of @mentions and scheme-less URLs in `sendMessage` by enclosing
-  // '.' and '@' in `<code>` to trick the Telegram parser (no clean option to disable that). This
-  // changes the font typography (to monospaced) but it's the best we can get in HTML mode (using
-  // invisible chars is a bad idea because it breaks copy-paste, searching etc.). Note that in
-  // MarkdownV2 mode, those could be simply escaped with '\', but it has its own parsing problems
-  // (e.g. putting pre blocks inside expandable block quotes is not possible)
+  // Suppress automatic recognition of @mentions, #hashtags and scheme-less URLs in `sendMessage` by
+  // enclosing the whole string in `<code>` (this is the only way to do it in HTML mode except using
+  // invisible spaces or similar tricks, which is bad because it breaks copy-paste, searching etc.).
+  // Note that in MarkdownV2 mode, we could simply escape '.' and '@' with '\', but it has its own
+  // parsing problems (e.g. putting `pre` blocks inside expandable block quotes is not possible).
+  // Note that the regexp is very broad, it matches anything that starts wih '@', '#' and also
+  // anything that looks like a file path or an URL (with an arbitrary scheme not strictly following
+  // RFC) - we assume that displaying it as inline code is fine.
+  // Playground: https://regex101.com/r/dE8tbd/1
   return escapeHtml (value_)
-  .replaceAll (/\b[A-Za-z][A-Za-z0-9+.-]*(?::\/\/|@)[^\s<]+|(?<=[\p{L}\p{N}_])\.(?=[\p{L}\p{N}_])/gu,
-    match => match === '.' ? '<code>.</code>' : match)
-  .replaceAll (/(^|\s)([@#/])(?=[A-Za-z0-9_]+(?:\s|$))/gu,
-    '$1<code>$2</code>');
+  .replaceAll (/(^|[^\p{L}\p{M}\p{N}/\\#@.])([/\\#@]+|\.|[\p{L}\p{M}\p{N}]+:[/\\]{0,2}|[\p{L}\p{M}\p{N}_+%=$~./\\#@?-]*\.[\p{L}\p{M}\p{N}_+%=$~./\\#@?-]+)([\p{L}\p{M}\p{N}_+%=$~./\\#@?-]+)(?=[^\p{L}\p{M}\p{N}]|$)/gu,
+  (match: string, pre: string, start: string, rest: string) =>
+  {
+    const startLower = start.toLowerCase ();
+    // Keep some exceptions since Telegram should do what we need for those
+    if ([ 'http://', 'https://', 'ftp://' ].includes (startLower))
+      return match;
+    // Make emails also work
+    if (/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u.test (startLower === 'mailto:' ? rest : start + rest))
+      return match;
+    // The rest is code...
+    return `${pre}<code>${start}${rest}</code>`;
+  });
 }
 
 
