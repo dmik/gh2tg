@@ -178,6 +178,13 @@ function getIssueLabel (issue_: UnknownObject, url_?: unknown)
 }
 
 
+function getLabelLabel (label_: UnknownObject, repoUrl_: unknown)
+{
+  const labelName = get (label_, 'name');
+  return `${boldLink (labelName, `${repoUrl_}/issues/?q=${encodeURIComponent (`label:"${labelName}"`)}`)}`;
+}
+
+
 function getSenderLabel (payload_: GitHubPayload): string
 {
   const sender = get (payload_, 'sender.login');
@@ -252,9 +259,21 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const [ icon, object, subject ] = event_ === 'issues'
         ? [ '📝', getObject (payload_, 'issue'), 'issue' ]
         : [ '🔀', getObject (payload_, 'pull_request'), 'pull request' ];
-      const body = (action === 'opened') ? String (get (object, 'body') ?? '').trim () : '';
-      const text = body ? `\n\n${expQuote (escapeAll (body))}` : body;
-      return [ `${icon} ${sender} ${action} ${subject} ${getIssueLabel (object)} in ${resName}${text}` ];
+      let actionText = '', body = '';
+      switch (action)
+      {
+        case 'opened':
+          body = String (get (object, 'body') ?? '').trim ();
+          break;
+        case 'labeled':
+          actionText = `added label ${getLabelLabel (getObject (payload_, 'label'), resUrl)} to`;
+          break;
+        case 'unlabeled':
+          // GitHub BUG: no '.label' in the payload for 'unlabeled' action
+          actionText = `removed some label from`;
+          break;
+      }
+      return [ `${icon} ${sender} ${actionText ?? action} ${subject} ${getIssueLabel (object)} in ${resName}${body}` ];
     }
 
     case 'issue_comment':
@@ -270,6 +289,9 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
 
     case 'pull_request_review':
       return [ `👀 ${sender} ${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))} in ${resName}` ];
+
+    case 'label':
+      return [ `🔖 ${sender} ${action} label ${getLabelLabel (getObject (payload_, 'label'), resUrl)} in ${resName}` ];
 
     case 'release':
       return [ `🚀 ${sender} ${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))} in ${resName}` ];

@@ -13,6 +13,7 @@
 - Recognize branch/tag creation/deletion in GitHub push events.
 - Suppress automatic recognition of @mentions and scheme-less URLs by Telegram.
 - Move issue / pull request number out of link, remove bold from link.
+- Show label names in label-related events.
 
 ## v0.0.1 - 2026-08-10
 
