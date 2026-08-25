@@ -14,6 +14,7 @@
 - Suppress automatic recognition of @mentions and scheme-less URLs by Telegram.
 - Move issue / pull request number out of link, remove bold from link.
 - Show label names in label-related events.
+- Use branch and tag icons for branch/tag creation/deletion events.
 
 ## v0.0.1 - 2026-08-10
 

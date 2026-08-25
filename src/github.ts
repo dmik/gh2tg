@@ -218,13 +218,16 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const action = isCreated ? 'created ' : isDeleted ? 'deleted ' : '';
       const force = !! payload_.forced ? 'force-' : '';
 
-      let subject, showCommits = ! isCreated && ! isDeleted;
+      let icon = '📦', subject, showCommits = ! isCreated && ! isDeleted;
       switch (type)
       {
         case 'heads':
-          subject = `${action ? `${action}branch ` : ''}${label}`;
+          action
+            ? (icon = '🪾', subject = `${action}branch ${label}`)
+            : subject = label;
           break;
         case 'tags':
+          icon = '🏷️';
           subject = `${action}tag ${label}`;
           showCommits = false;
           break;
@@ -233,7 +236,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       }
 
       if (! showCommits)
-        return [ `📦 ${sender} ${force}${subject} @ ${commitLabel} in ${resName}` ];
+        return [ `${icon} ${sender} ${force}${subject} @ ${commitLabel} in ${resName}` ];
 
       const commits: UnknownObject [] = Array.isArray (payload_.commits) ? payload_.commits : [];
       const count = commits.length;
@@ -250,7 +253,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
         text += `\n• ${commitLink (commit.id, commit.url)}: ${escapeAll (nl < 0 ? message : message.slice (0, nl))}`;
       }
       text = text.trim ();
-      return [ `📦 ${sender} ${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject} in ${resName}` + (text ? `\n\n${expQuote (text)}` : text) ];
+      return [ `${icon} ${sender} ${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject} in ${resName}` + (text ? `\n\n${expQuote (text)}` : text) ];
     }
 
     case 'issues':
