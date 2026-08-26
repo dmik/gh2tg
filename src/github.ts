@@ -281,7 +281,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const [ icon, object, subject ] = event_ === 'issues'
         ? [ '📝', getObject (payload_, 'issue'), 'issue' ]
         : [ '🔀', getObject (payload_, 'pull_request'), 'pull request' ];
-      let actionText = '', body = '';
+      let actionText, body;
       switch (action)
       {
         case 'opened':
