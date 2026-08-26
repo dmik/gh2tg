@@ -150,80 +150,83 @@ const spaceBeforeCallParen =
 };
 
 
-function createMultilineLiteralAllmanRule (nodeType, openValue, closeValue, description)
+const multilineLiteralAllman =
 {
-  return {
-    meta:
+  meta:
+  {
+    type: "layout",
+    fixable: "whitespace",
+    schema: [],
+    messages:
     {
-      type: "layout",
-      fixable: "whitespace",
-      schema: [],
-      messages: { kr: `Multiline ${description} literals must use Allman style.` }
-    },
+      allman: "Multiline literals must use Allman style with braces aligned to their declaration."
+    }
+  },
 
-    create (context)
+  create (context)
+  {
+    const source = context.sourceCode;
+
+    function indentOfLine (line1)
     {
-      const source = context.sourceCode;
+      return (source.lines [line1 - 1]?.match (/^\s*/) || [ "" ]) [0];
+    }
 
-      function check (node)
+    function check (node, openValue, closeValue)
+    {
+      const open = source.getFirstToken (node, token => token.value === openValue);
+      const close = source.getLastToken (node, token => token.value === closeValue);
+      if (! open || ! close || open.loc.start.line === close.loc.start.line)
+        return;
+
+      const line = source.lines [open.loc.start.line - 1] ?? "";
+      const before = line.slice (0, open.loc.start.column);
+
+      // Allow a literal starting immediately after an opening parenthesis.
+      if (/^\s*\($/.test (before))
+        return;
+
+      const previous = source.getTokenBefore (open, { includeComments: false });
+
+      // Preserve the explicit `return {` / `return [` exception.
+      if (previous?.type === "Keyword" && previous.value === "return")
+        return;
+
+      const declaration = [ "VariableDeclarator", "AssignmentExpression", "TSTypeAliasDeclaration" ]
+      .includes (node.parent.type) ? node.parent : null;
+      const expectedIndent = declaration ? indentOfLine (declaration.loc.start.line) : null;
+
+      for (const delimiter of [ open, close ])
       {
-        const open = source.getFirstToken (node, token => token.value === openValue);
-        const close = source.getLastToken (node, token => token.value === closeValue);
-        if (! open || ! close || open.loc.start.line === close.loc.start.line)
-          return;
-
-        const line = source.lines [open.loc.start.line - 1] ?? "";
-        const before = line.slice (0, open.loc.start.column);
-
-        // Allow a literal starting immediately after an opening parenthesis.
-        if (/^\s*\($/.test (before))
-          return;
-
-        const previous = source.getTokenBefore (open, { includeComments: false });
-
-        // Preserve the explicit `return {` / `return [` exception.
-        if (previous?.type === "Keyword" && previous.value === "return")
-          return;
-
-        if (! /\S/.test (before))
-          return;
+        const isOnOwnLine = ! /\S/.test ((source.lines [delimiter.loc.start.line - 1] ?? "")
+        .slice (0, delimiter.loc.start.column));
+        if (isOnOwnLine && (expectedIndent === null || delimiter.loc.start.column === expectedIndent.length))
+          continue;
 
         context.report (
         {
           node,
-          loc: open.loc,
-          messageId: "kr",
+          loc: delimiter.loc,
+          messageId: "allman",
           fix (fixer)
           {
-            if (! previous)
+            const indent = expectedIndent ?? indentOfLine (delimiter.loc.start.line);
+            const tokenBefore = source.getTokenBefore (delimiter, { includeComments: false });
+            if (! tokenBefore)
               return null;
-
-            const gap = source.text.slice (previous.range [1], open.range [0]);
-            if (/[^\s]/.test (gap))
-              return null;
-
-            const indent = (line.match (/^\s*/) || [ "" ]) [0];
-            return fixer.replaceTextRange (
-              [ previous.range [1], open.range [0] ],
-              "\n" + indent
-            );
+            return fixer.replaceTextRange ([ tokenBefore.range [1], delimiter.range [0] ], "\n" + indent);
           }
         });
       }
-
-      return { [nodeType]: check };
     }
-  };
-}
 
-
-const forbidKrMultilineObject = createMultilineLiteralAllmanRule (
-  "ObjectExpression", "{", "}", "object"
-);
-
-const forbidKrMultilineArray = createMultilineLiteralAllmanRule (
-  "ArrayExpression", "[", "]", "array"
-);
+    return {
+      ObjectExpression: node => check (node, "{", "}"),
+      ArrayExpression: node => check (node, "[", "]"),
+      TSTypeLiteral: node => check (node, "{", "}")
+    };
+  }
+};
 
 
 const allmanWithIndent =
@@ -591,8 +594,7 @@ const sharedConfig =
         {
           "space-before-computed-bracket": spaceBeforeComputedBracket,
           "space-before-call-paren": spaceBeforeCallParen,
-          "no-kr-multiline-object": forbidKrMultilineObject,
-          "no-kr-multiline-array": forbidKrMultilineArray,
+          "multiline-literal-allman": multilineLiteralAllman,
           "allman-block-brace": allmanWithIndent,
           "semicolon-spacing": semicolonSpacing,
           "colon-spacing": colonSpacing,
@@ -620,8 +622,7 @@ const sharedConfig =
 
       "space-before-blocks": [ "error", "always" ],
 
-      "custom-style/no-kr-multiline-object": [ "error" ],
-      "custom-style/no-kr-multiline-array": [ "error" ],
+      "custom-style/multiline-literal-allman": "error",
       "custom-style/semicolon-spacing": "error",
       "custom-style/colon-spacing": "error",
       "custom-style/space-before-generic-angle-bracket": "error",
@@ -686,9 +687,7 @@ const sharedConfig =
           "ignoredNodes":
           [
             "VariableDeclarator > ObjectExpression",
-            "VariableDeclarator > ObjectExpression > Property",
             "AssignmentExpression > ObjectExpression",
-            "AssignmentExpression > ObjectExpression > Property",
             "CallExpression > ArrowFunctionExpression",
             "CallExpression > ArrowFunctionExpression > *",
             "CallExpression[arguments.0.type='ArrowFunctionExpression']",
@@ -697,9 +696,8 @@ const sharedConfig =
             "CallExpression[arguments.2.type='ObjectExpression']",
             "CallExpression[arguments.3.type='ObjectExpression']",
             "AssignmentExpression > ArrayExpression",
-            "AssignmentExpression > ArrayExpression > *",
             "VariableDeclarator > ArrayExpression",
-            "VariableDeclarator > ArrayExpression > *",
+            "TSTypeAliasDeclaration > TSTypeLiteral",
             "ClassBody > MethodDefinition",
             "ClassBody > PropertyDefinition"
           ]
