@@ -181,7 +181,7 @@ function getIssueLabel (issue_: UnknownObject, url_?: unknown)
 function getLabelLabel (label_: UnknownObject, repoUrl_: unknown)
 {
   const labelName = get (label_, 'name');
-  return `${boldLink (labelName, `${repoUrl_}/issues/?q=${encodeURIComponent (`label:"${labelName}"`)}`)}`;
+  return `${boldLink (labelName, repoUrl_ ? `${repoUrl_}/issues/?q=${encodeURIComponent (`label:"${labelName}"`)}` : undefined)}`;
 }
 
 
@@ -294,7 +294,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       return [ `👀 ${sender} ${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))} in ${resName}` ];
 
     case 'label':
-      return [ `🔖 ${sender} ${action} label ${getLabelLabel (getObject (payload_, 'label'), resUrl)} in ${resName}` ];
+      return [ `🔖 ${sender} ${action} label ${getLabelLabel (getObject (payload_, 'label'), action === 'created' ? resUrl : undefined)} in ${resName}` ];
 
     case 'release':
       return [ `🚀 ${sender} ${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))} in ${resName}` ];
