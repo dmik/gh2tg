@@ -102,6 +102,25 @@ function expQuote (text_: string): string
 }
 
 
+type RepoMessage =
+{
+  repo?: string;
+  icon?: string;
+  sender?: string;
+  subject?: string;
+  preposition?: string; // 'in' by default
+  subject2?: string;
+  body?: string;
+  bodyEscape?: boolean; // true by default
+};
+
+function repoMessage (msg_: RepoMessage): SendMessage
+{
+  const fields = [ msg_.icon, msg_.sender, msg_.subject, msg_.preposition ?? 'in', msg_.repo, msg_.subject2 ];
+  return [ fields.filter (Boolean).join (' ') + (msg_.body ? `\n\n${expQuote ((msg_.bodyEscape ?? true) ? escapeAll (msg_.body) : msg_.body)}` : '') ];
+}
+
+
 function get (payload_: GitHubPayload, path_: string): unknown
 {
   return path_.split ('.').reduce <unknown> ((value, key) =>
@@ -236,24 +255,24 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       }
 
       if (! showCommits)
-        return [ `${icon} ${sender} ${force}${subject} @ ${commitLabel} in ${resName}` ];
+        return repoMessage ({ repo: resName, icon, sender, subject: `${force}${subject} @ ${commitLabel}` });
 
       const commits: UnknownObject [] = Array.isArray (payload_.commits) ? payload_.commits : [];
       const count = commits.length;
-      let text = '';
+      let body = '';
       for (const [ i, commit ] of commits.entries ())
       {
         if (i >= MAX_COMMITS)
         {
-          text += `\n…and ${commitRangeLink (`${count - i} more`, resUrl, commit.id, commits [count - 1].id)}`;
+          body += `\n…and ${commitRangeLink (`${count - i} more`, resUrl, commit.id, commits [count - 1].id)}`;
           break;
         }
         const message = String (commit.message ?? '');
         const nl = message.indexOf ('\n');
-        text += `\n• ${commitLink (commit.id, commit.url)}: ${escapeAll (nl < 0 ? message : message.slice (0, nl))}`;
+        body += `\n• ${commitLink (commit.id, commit.url)}: ${escapeAll (nl < 0 ? message : message.slice (0, nl))}`;
       }
-      text = text.trim ();
-      return [ `${icon} ${sender} ${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject} in ${resName}` + (text ? `\n\n${expQuote (text)}` : text) ];
+      body = body.trim ();
+      return repoMessage ({ repo: resName, icon, sender, subject: `${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject}`, body, bodyEscape: false });
     }
 
     case 'issues':
@@ -276,7 +295,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           actionText = `removed some label from`;
           break;
       }
-      return [ `${icon} ${sender} ${actionText ?? action} ${subject} ${getIssueLabel (object)} in ${resName}${body}` ];
+      return repoMessage ({ repo: resName, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}`, body });
     }
 
     case 'issue_comment':
@@ -286,27 +305,26 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const [ body, actionText ] = (action === 'created')
         ? [ String (get (payload_, 'comment.body') ?? '').trim (), `commented on ${subject}` ]
         : [ '', `${action} ${subject} comment` ];
-      const text = body ? `\n\n${expQuote (escapeAll (body))}` : body;
-      return [ `💬 ${sender} ${actionText} ${getIssueLabel (issue, get (payload_, 'comment.html_url'))} in ${resName}${text}` ];
+      return repoMessage ({ repo: resName, icon: '💬', sender, subject: `${actionText} ${getIssueLabel (issue, get (payload_, 'comment.html_url'))}`, body });
     }
 
     case 'pull_request_review':
-      return [ `👀 ${sender} ${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))} in ${resName}` ];
+      return repoMessage ({ repo: resName, icon: '👀', sender, subject: `${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))}` });
 
     case 'label':
-      return [ `🔖 ${sender} ${action} label ${getLabelLabel (getObject (payload_, 'label'), action === 'created' ? resUrl : undefined)} in ${resName}` ];
+      return repoMessage ({ repo: resName, icon: '🔖', sender, subject: `${action} label ${getLabelLabel (getObject (payload_, 'label'), action === 'created' ? resUrl : undefined)}` });
 
     case 'release':
-      return [ `🚀 ${sender} ${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))} in ${resName}` ];
+      return repoMessage ({ repo: resName, icon: '🚀', sender, subject: `${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))}` });
 
     case 'workflow_run':
-      return [ `⚙️ ${sender} ${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow ${boldLink (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))} in ${resName}` ];
+      return repoMessage ({ repo: resName, icon: '⚙️', sender, subject: `${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow ${boldLink (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))}` });
 
     case 'star':
-      return [ `⭐ ${sender} ${action} a star on ${resName}` ];
+      return repoMessage ({ repo: resName, icon: '⭐', sender, subject: `${action} a star`, preposition: 'on' });
 
     case 'fork':
-      return [ `🍴 ${sender} forked ${resName} as ${getRepoLabel (getObject (payload_, 'forkee'))}` ];
+      return repoMessage ({ repo: resName, icon: '🍴', sender, subject: 'forked', preposition: '', subject2: `as ${getRepoLabel (getObject (payload_, 'forkee'))}` });
 
     case 'create':
     case 'delete':
@@ -315,7 +333,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       return;
 
     default:
-      return [ `🔔 ${sender} ${action} ${escapeHtml (event_)} in ${resName}` ];
+      return repoMessage ({ repo: resName, icon: '🔔', sender, subject: `${action} ${escapeHtml (event_)}` });
   }
 }
 
