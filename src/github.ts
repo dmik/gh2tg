@@ -204,12 +204,12 @@ function getLabelLabel (label_: UnknownObject, repoUrl_: unknown)
 }
 
 
-function getSenderLabel (payload_: GitHubPayload): string
+function getActorLabel (actor_: UnknownObject): string
 {
-  const sender = get (payload_, 'sender.login');
-  if (! sender)
+  const actor = get (actor_, 'login');
+  if (! actor)
     return boldLink ('GitHub');
-  return boldLink (sender, get (payload_, 'sender.html_url'));
+  return boldLink (actor, get (actor_, 'html_url'));
 }
 
 
@@ -217,7 +217,8 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
 {
   const action = escapeHtml (payload_.action ?? 'did something with');
   const [ resName, resType, resUrl ] = getResource (payload_);
-  const sender = getSenderLabel (payload_);
+  const senderObj = getObject (payload_, 'sender');
+  const sender = getActorLabel (senderObj);
 
   switch (event_)
   {
@@ -281,7 +282,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const [ icon, object, subject ] = event_ === 'issues'
         ? [ '📝', getObject (payload_, 'issue'), 'issue' ]
         : [ '🔀', getObject (payload_, 'pull_request'), 'pull request' ];
-      let actionText, body;
+      let actionText, body, subject2;
       switch (action)
       {
         case 'opened':
@@ -292,10 +293,20 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           break;
         case 'unlabeled':
           // GitHub BUG: no '.label' in the payload for 'unlabeled' action
-          actionText = `removed some label from`;
+          actionText = 'removed some label from';
           break;
+        case 'assigned':
+        case 'unassigned':
+        {
+          const assignee = getObject (payload_, 'assignee');
+          if (senderObj.id === assignee.id)
+            actionText = `self-${action}`;
+          else
+            subject2 = `${action === 'assigned' ? 'to' : 'from'} ${getActorLabel (assignee)}`;
+          break;
+        }
       }
-      return repoMessage ({ repo: resName, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}`, body });
+      return repoMessage ({ repo: resName, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}`, subject2, body });
     }
 
     case 'issue_comment':
