@@ -193,14 +193,21 @@ function getRepoLabel (repo_: UnknownObject)
 
 function getIssueLabel (issue_: UnknownObject, url_?: unknown)
 {
-  return `${code (`#${get (issue_, 'number')}`)} ${link (get (issue_, 'title'), url_ ?? get (issue_, 'html_url'))}`;
+  return `${code (`#${get (issue_, 'number')}`)} ${boldLink (get (issue_, 'title'), url_ ?? get (issue_, 'html_url'))}`;
+}
+
+
+function getIssueCloseReasonLabel (reason_: string, repoUrl_: unknown)
+{
+  // NOTE: Follow GitHub underscore rules: spaces for humans, dashes for issue search queries
+  return `${boldLink ((reason_ || 'unknown').replaceAll ('_', ' '), reason_ && repoUrl_ ? `${repoUrl_}/issues/?q=state:closed%20reason:${encodeURIComponent (reason_.replaceAll ('_', '-'))}` : undefined)}`;
 }
 
 
 function getLabelLabel (label_: UnknownObject, repoUrl_: unknown)
 {
   const labelName = get (label_, 'name');
-  return `${boldLink (labelName, repoUrl_ ? `${repoUrl_}/issues/?q=${encodeURIComponent (`label:"${labelName}"`)}` : undefined)}`;
+  return `${boldLink (labelName ?? 'unknown', labelName && repoUrl_ ? `${repoUrl_}/issues/?q=label:${encodeURIComponent (`"${labelName}"`)}` : undefined)}`;
 }
 
 
@@ -290,14 +297,21 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
     case 'issues':
     case 'pull_request':
     {
-      const [ icon, object, subject ] = event_ === 'issues'
+      const isIssue = event_ === 'issues';
+      const [ icon, object, subject ] = isIssue
         ? [ '📝', getObject (payload_, 'issue'), 'issue' ]
         : [ '🔀', getObject (payload_, 'pull_request'), 'pull request' ];
-      let actionText, body, subject2;
+      let actionText, body, actionText2 = '', subject2;
       switch (action)
       {
         case 'opened':
           body = String (get (object, 'body') ?? '').trim ();
+          break;
+        case 'closed':
+          if (! isIssue) // pull request
+            object.merged ? actionText = 'merged' : actionText2 = ' without merging';
+          else if (object.state_reason)
+            actionText2 = ` as ${getIssueCloseReasonLabel (String (object.state_reason), resUrl)}`;
           break;
         case 'labeled':
           actionText = `added label ${getLabelLabel (getObject (payload_, 'label'), resUrl)} to`;
@@ -317,7 +331,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           break;
         }
       }
-      return repoMessage ({ repo: resName, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}`, subject2, body });
+      return repoMessage ({ repo: resName, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}${actionText2}`, subject2, body });
     }
 
     case 'issue_comment':

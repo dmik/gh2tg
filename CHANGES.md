@@ -15,8 +15,9 @@
 - Move issue / pull request number out of link, remove bold from link.
 - Show label names in label-related events.
 - Use branch and tag icons for branch/tag creation/deletion events.
-- Show assignee for assigned/unassigned actions in issues/pull_request events.
+- Show assignee for assigned/unassigned actions in issue / pull request events.
 - Show commit author if differs from sender/pusher.
+- Show issue / pull request close reason.
 
 ## v0.0.1 - 2026-08-10
 
