@@ -230,6 +230,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
     {
       const ref = String (payload_.ref ?? '');
       const [ _, type, name ] = ref.split ('/');
+      const pusher = getObject (payload_, 'pusher');
       const isCreated = !! payload_.created;
       const isDeleted = !! payload_.deleted;
       const label = refLink (name ?? ref, ref, isDeleted ? undefined : resUrl);
@@ -268,9 +269,19 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           body += `\n…and ${commitRangeLink (`${count - i} more`, resUrl, commit.id, commits [count - 1].id)}`;
           break;
         }
+        const author = getObject (commit, 'author');
+        let authorLabel = '';
+        if (author?.email !== pusher?.email)
+        {
+          // NOTE: TG does not support mailto:, construct a GitHub user link
+          const authorLink = author?.username ? `https://github.com/${author.username}` : undefined;
+          authorLabel = ` // ${boldLink (author.username ?? author.name ?? 'someone', authorLink)}`;
+        }
         const message = String (commit.message ?? '');
         const nl = message.indexOf ('\n');
-        body += `\n• ${commitLink (commit.id, commit.url)}: ${escapeAll (nl < 0 ? message : message.slice (0, nl))}`;
+        let firstLine = (nl < 0 ? message : message.slice (0, nl)).trim ();
+        firstLine = firstLine.replace (/(?<=[^.])\.$/, '');
+        body += `\n• ${commitLink (commit.id, commit.url)}: ${escapeAll (firstLine)}${authorLabel}`;
       }
       body = body.trim ();
       return repoMessage ({ repo: resName, icon, sender, subject: `${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject}`, body, bodyEscape: false });
