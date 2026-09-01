@@ -236,7 +236,8 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
     case 'push':
     {
       const ref = String (payload_.ref ?? '');
-      const [ _, type, name ] = ref.split ('/');
+      const [ _, type ] = ref.split ('/', 2);
+      const name = ref.slice (_.length + 1 + (type?.length ?? 0) + 1);
       const pusher = getObject (payload_, 'pusher');
       const isCreated = !! payload_.created;
       const isDeleted = !! payload_.deleted;
