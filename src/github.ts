@@ -230,8 +230,21 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
   switch (event_)
   {
     case 'ping':
-      return [ `🏓 ${sender} connected ${resType} ${resName}`, ! resUrl ?
-        false : { link_preview_options: { url: resUrl } } ];
+      return [ `🏓 ${sender} connected ${resType} ${resName}`,
+        ! resUrl ? false : { link_preview_options: { url: resUrl } } ];
+
+    case 'repository':
+    {
+      const isCreated = action === 'created';
+      const isPublicized = action === 'publicized';
+      return [ `📚 ${sender} ${action} ${isCreated ? resType : event_} ${resName}`,
+        (! resUrl || ! (isCreated || isPublicized)) ? false : { link_preview_options: { url: resUrl } } ];
+    }
+
+    case 'public':
+      // 'public' events are old notations for publicized actions in repository events, ignore them
+      // to avoid duplicates (GitHub sends both for compatibility)
+      return;
 
     case 'push':
     {
