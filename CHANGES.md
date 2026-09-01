@@ -18,6 +18,7 @@
 - Show assignee for assigned/unassigned actions in issue / pull request events.
 - Show commit author if differs from sender/pusher.
 - Show issue / pull request close reason.
+- Show destination repository in issue / pull request transfer events.
 
 ## v0.0.1 - 2026-08-10
 

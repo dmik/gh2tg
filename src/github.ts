@@ -191,9 +191,9 @@ function getRepoLabel (repo_: UnknownObject)
 }
 
 
-function getIssueLabel (issue_: UnknownObject, url_?: unknown)
+function getIssueLabel (issue_: UnknownObject, url_?: unknown, title_?: string)
 {
-  return `${code (`#${get (issue_, 'number')}`)} ${boldLink (get (issue_, 'title'), url_ ?? get (issue_, 'html_url'))}`;
+  return `${code (`#${get (issue_, 'number')}`)} ${boldLink (title_ ?? get (issue_, 'title'), url_ ?? get (issue_, 'html_url'))}`;
 }
 
 
@@ -301,7 +301,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const [ icon, object, subject ] = isIssue
         ? [ '📝', getObject (payload_, 'issue'), 'issue' ]
         : [ '🔀', getObject (payload_, 'pull_request'), 'pull request' ];
-      let actionText, body, actionText2 = '', subject2;
+      let actionText, body, actionText2 = '', subject2, preposition;
       switch (action)
       {
         case 'opened':
@@ -330,8 +330,15 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
             subject2 = `${action === 'assigned' ? 'to' : 'from'} ${getActorLabel (assignee)}`;
           break;
         }
+        case 'transferred':
+        {
+          const changes = getObject (payload_, 'changes');
+          preposition = 'from';
+          subject2 = `to ${getIssueLabel (getObject (changes, 'new_issue'), undefined, '(〃)')} in ${getRepoLabel (getObject (changes, 'new_repository'))}`;
+          break;
+        }
       }
-      return repoMessage ({ repo: resName, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}${actionText2}`, subject2, body });
+      return repoMessage ({ repo: resName, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}${actionText2}`, preposition, subject2, body });
     }
 
     case 'issue_comment':
