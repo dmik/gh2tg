@@ -226,6 +226,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
   const [ resName, resType, resUrl ] = getResource (payload_);
   const senderObj = getObject (payload_, 'sender');
   const sender = getActorLabel (senderObj);
+  const isGhost = senderObj?.login === 'ghost';
 
   switch (event_)
   {
@@ -369,7 +370,12 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       return repoMessage ({ repo: resName, icon: '👀', sender, subject: `${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))}` });
 
     case 'label':
-      return repoMessage ({ repo: resName, icon: '🔖', sender, subject: `${action} label ${getLabelLabel (getObject (payload_, 'label'), action === 'created' ? resUrl : undefined)}` });
+    {
+      const isCreated = action === 'created';
+      if (isCreated && isGhost)
+        return; // Ignore default label bootstrapping at repository creation
+      return repoMessage ({ repo: resName, icon: '🔖', sender, subject: `${action} label ${getLabelLabel (getObject (payload_, 'label'), isCreated ? resUrl : undefined)}` });
+    }
 
     case 'release':
       return repoMessage ({ repo: resName, icon: '🚀', sender, subject: `${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))}` });
