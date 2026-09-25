@@ -21,6 +21,7 @@
 - Show destination repository in issue / pull request transfer events.
 - Support repository events.
 - Ignore default label bootstrapping at repository creation.
+- Support milestoned/demilestoned issue / pull request actions.
 
 ## v0.0.1 - 2026-08-10
 

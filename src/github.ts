@@ -335,6 +335,14 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           // GitHub BUG: no '.label' in the payload for 'unlabeled' action
           actionText = 'removed some label from';
           break;
+        case 'milestoned':
+          actionText = 'added';
+          actionText2 = ` to milestone ${getIssueLabel (getObject (payload_, 'milestone'))}`;
+          break;
+        case 'demilestoned':
+          actionText = 'removed';
+          actionText2 = ` from milestone ${getIssueLabel (getObject (payload_, 'milestone'))}`;
+          break;
         case 'assigned':
         case 'unassigned':
         {
