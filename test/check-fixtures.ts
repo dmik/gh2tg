@@ -61,6 +61,7 @@ process.loadEnvFile (join (dirname (FIXTURES_DIR), '..', '.dev.vars'));
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
+const privateChatId = process.env.TELEGRAM_PRIVATE_CHAT_ID;
 if (! token || ! chatId)
   throw new Error ('TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set in .dev.vars');
 
@@ -87,16 +88,17 @@ async function main (): Promise <void>
 
       if (message)
       {
-        console.log (`\n${message [0]}\n\nOptions: ${JSON.stringify (message [1])}\n`);
+        console.log (`\n${message.text}\n\nOptions: ${JSON.stringify (message.options)}\nIsPrivate: ${message.isPrivate}\n`);
 
-        await sendMessage (message,
+        const rc = await sendMessage (message,
         {
           GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET ?? '',
           TELEGRAM_BOT_TOKEN: token,
           TELEGRAM_CHAT_ID: chatId,
+          TELEGRAM_PRIVATE_CHAT_ID: privateChatId,
         });
 
-        console.log (`Sent '${event}/${file}' to Telegram.`);
+        console.log (`${rc ? 'Sent' : 'Did not send'} '${event}/${file}' to Telegram.`);
       }
       else
         console.log (`\nIgnoring '${event}/${file}'; didn't produce a message.`);

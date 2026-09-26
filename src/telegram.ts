@@ -1,7 +1,7 @@
 import { parse_html } from '@telegraf/entity';
 
 
-export type SendMessage = [ text: string, previewOrOptions?: boolean | object ];
+export type SendMessage = { text: string, options?: boolean | object, isPrivate?: boolean };
 
 const TELEGRAM_TEXT_LIMIT = 4096;
 
@@ -40,20 +40,23 @@ export function splitMessage (html_: string): TelegramMessage []
 }
 
 
-export async function sendMessage (message_: SendMessage, env_: Env): Promise <void>
+export async function sendMessage (message_: SendMessage, env_: Env): Promise <boolean>
 {
+  const chat_id = message_.isPrivate ? env_.TELEGRAM_PRIVATE_CHAT_ID : env_.TELEGRAM_CHAT_ID;
+  if (! chat_id)
+    return false;
+
   const endpoint = `https://api.telegram.org/bot${env_.TELEGRAM_BOT_TOKEN}/sendMessage`;
-  const [ message, options ] = message_;
 
-  const apiOptions = typeof options === 'object' ? options : { disable_web_page_preview: ! options };
+  const options = typeof message_.options === 'object' ? message_.options : { disable_web_page_preview: ! message_.options };
 
-  for (const chunk of splitMessage (message))
+  for (const chunk of splitMessage (message_.text))
   {
     const response = await fetch (endpoint,
     {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify ({ ...apiOptions, chat_id: env_.TELEGRAM_CHAT_ID, ...chunk }),
+      body: JSON.stringify ({ ...options, chat_id, ...chunk }),
     });
 
     if (! response.ok)
@@ -62,4 +65,5 @@ export async function sendMessage (message_: SendMessage, env_: Env): Promise <v
       throw new Error (`Telegram API returned ${response.status}: ${detail.slice (0, 500)}`);
     }
   }
+  return true;
 }

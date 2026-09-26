@@ -11,6 +11,7 @@ const env: Env =
   GITHUB_WEBHOOK_SECRET: 'It\'s a Secret to Everybody',
   TELEGRAM_BOT_TOKEN: 'test-token',
   TELEGRAM_CHAT_ID: '-100123',
+  TELEGRAM_PRIVATE_CHAT_ID: '',
 };
 
 
@@ -108,8 +109,8 @@ describe ('webhook', () =>
     expect (message).not.toBe (undefined);
     if (message)
     {
-      expect (message [0]).toContain ('connected');
-      expect (message [0]).toContain ('<a href="https://github.com/acme">acme</a>');
+      expect (message.text).toContain ('connected');
+      expect (message.text).toContain ('<a href="https://github.com/acme">acme</a>');
     }
   });
 
@@ -119,8 +120,8 @@ describe ('webhook', () =>
     expect (message).not.toBe (undefined);
     if (message)
     {
-      expect (message [0]).toContain ('connected');
-      expect (message [0]).toContain ('Unsupported resource');
+      expect (message.text).toContain ('connected');
+      expect (message.text).toContain ('Unsupported resource');
     }
   });
 });
@@ -128,11 +129,25 @@ describe ('webhook', () =>
 
 describe ('message formatting', () =>
 {
+  it ('routes private messages only when a private chat is configured', async () =>
+  {
+    const fetchMock = vi.spyOn (globalThis, 'fetch').mockResolvedValue (new Response ('{}', { status: 200 }));
+    const message = { text: 'Private repository event', isPrivate: true };
+
+    await expect (sendMessage (message, env)).resolves.toBe (false);
+    expect (fetchMock).not.toHaveBeenCalled ();
+
+    await expect (sendMessage (message, { ...env, TELEGRAM_PRIVATE_CHAT_ID: '-100456' })).resolves.toBe (true);
+    expect (fetchMock).toHaveBeenCalledOnce ();
+    const body = JSON.parse (String (fetchMock.mock.calls [0] [1]?.body)) as Record <string, unknown>;
+    expect (body.chat_id).toBe ('-100456');
+  });
+
   it ('honors the per-message preview indicator', async () =>
   {
     const fetchMock = vi.spyOn (globalThis, 'fetch').mockResolvedValue (new Response ('{}', { status: 200 }));
 
-    await sendMessage ([ 'With preview', true ], env);
+    await sendMessage ({ text: 'With preview', options: true }, env);
 
     expect (fetchMock).toHaveBeenCalledOnce ();
     const body = JSON.parse (String (fetchMock.mock.calls [0] [1]?.body)) as Record <string, unknown>;
@@ -144,7 +159,7 @@ describe ('message formatting', () =>
     const fetchMock = vi.spyOn (globalThis, 'fetch').mockResolvedValue (new Response ('{}', { status: 200 }));
     const linkPreviewOptions = { url: 'https://github.com/acme/app', prefer_large_media: true };
 
-    await sendMessage ([ 'With selected preview', { link_preview_options: linkPreviewOptions, disable_notification: true } ], env);
+    await sendMessage ({ text: 'With selected preview', options: { link_preview_options: linkPreviewOptions, disable_notification: true } }, env);
 
     const body = JSON.parse (String (fetchMock.mock.calls [0] [1]?.body)) as Record <string, unknown>;
     expect (body.link_preview_options).toEqual (linkPreviewOptions);
@@ -164,9 +179,9 @@ describe ('message formatting', () =>
     expect (message).not.toBe (undefined);
     if (message)
     {
-      expect (message [0]).toContain ('&lt;admin&gt;');
-      expect (message [0]).toContain ('Fix &lt;script&gt;');
-      expect (message [0]).not.toContain ('<script>');
+      expect (message.text).toContain ('&lt;admin&gt;');
+      expect (message.text).toContain ('Fix &lt;script&gt;');
+      expect (message.text).not.toContain ('<script>');
     }
   });
 

@@ -6,7 +6,6 @@
 			"script": "verify",
 			"problemMatcher": [],
 			"label": "npm: verify",
-			"detail": "npm run typecheck && npm test",
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -19,7 +18,6 @@
 				"$tsc"
 			],
 			"label": "npm: dev",
-			"detail": "wrangler dev --port 8787 --tunnel --tunnel-name gh2tg-dev --env ''",
 			"group": {
 				"kind": "test",
 				"isDefault": true
@@ -30,7 +28,12 @@
 			"script": "check-fixtures",
 			"problemMatcher": [],
 			"label": "npm: check-fixtures",
-			"detail": "node test/check-fixtures.ts"
+		},
+		{
+			"type": "npm",
+			"script": "types",
+			"problemMatcher": [],
+			"label": "npm: types",
 		}
 	]
 }

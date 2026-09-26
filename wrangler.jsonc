@@ -5,13 +5,13 @@
   "compatibility_date": "2026-08-07",
   "preview_urls": false,
   "secrets": {
-    "required": ["GITHUB_WEBHOOK_SECRET", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
+    "required": ["GITHUB_WEBHOOK_SECRET", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_PRIVATE_CHAT_ID"]
   },
   "env": {
     "test": {
       "name": "gh2tg-test",
       "secrets": {
-        "required": ["GITHUB_WEBHOOK_SECRET", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
+      "required": ["GITHUB_WEBHOOK_SECRET", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_PRIVATE_CHAT_ID"]
       }
     }
   }

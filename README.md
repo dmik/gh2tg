@@ -11,6 +11,7 @@ Telegram bot.
 - Pushes, issues, issue comments, pull requests, and reviews
 - Releases, workflow runs, stars, and forks
 - GitHub `ping` events and a useful generic fallback for other events
+- Hiding events from private repositories or posting them to another group
 - Telegram-safe formatting and entity-aware long-message splitting
 - `/` and `/health` health checks
 
@@ -20,8 +21,8 @@ Telegram bot.
 Requirements: Node.js 22+ and a Cloudflare account. A free account is enough unless you have an
 unusually high volume of GitHub notifications.
 
-1.  Create a Telegram bot with [@BotFather](https://t.me/BotFather), note its token and add it to
-    the target group.
+1.  Create a Telegram bot with [@BotFather](https://t.me/BotFather), note its token and add the bot
+    to the target group.
 
     NOTE: If necessary, convert the group to a supergroup (by setting the chat history for new
     members to "visible" in the group's settings) before adding the bot. This avoids reconfiguring
@@ -31,6 +32,9 @@ unusually high volume of GitHub notifications.
     `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates` right after adding the bot to the group.
     Group IDs are usually negative; supergroup IDs normally begin with `-100`.
 
+    If you want events from private repositories to be posted in another group, add the bot to that
+    group and obtain its chat ID as described above.
+
 3.  Install and authenticate Wrangler:
 
 ```sh
@@ -38,8 +42,14 @@ npm install
 npx wrangler login
 ```
 
-4.  Copy `.secrets.example` to `.secrets` and enter the Telegram credentials. Use the same random
-    value for `GITHUB_WEBHOOK_SECRET` in this file and in GitHub webhook settings later.
+4.  Copy `.secrets.example` to `.secrets` and enter the Telegram credentials in `TELEGRAM_BOT_TOKEN`
+    and `TELEGRAM_CHAT_ID`. Use the same random value for `GITHUB_WEBHOOK_SECRET` in this file and
+    in GitHub webhook settings later.
+
+    If you don't want events from private repositories to be posted, leave
+    `TELEGRAM_PRIVATE_CHAT_ID` empty, otherwise set it to the respective group's chat ID. Use the
+    same ID as in `TELEGRAM_CHAT_ID` if you want private repository events to be posted to the same
+    group as public repository events.
 
 5.  Initialize the Worker environment using the created secrets file:
 
@@ -58,13 +68,14 @@ npm run deploy
     - Payload URL: `https://gh2tg.<your-subdomain>.workers.dev/webhook`
     - Content type: `application/json`
     - Secret: the exact `GITHUB_WEBHOOK_SECRET` value
-    - Events: choose the events you want forwarded
+    - Events: choose "Send me everything" or the events you want forwarded
     - Active: enabled
 
 If you have a GitHub organization and want to get notifications from all its repositories, you can
 set up the webhook in the organization's settings instead.
 
-GitHub should send a `ping`, and the Telegram group should receive a confirmation. The GitHub
+GitHub should send a `ping`, and the Telegram group should receive a confirmation unless the
+repository is private and no Telegram group is configured for private repository events. The GitHub
 webhook delivery page is the best place to inspect a failed request.
 
 Note that the same Worker may be connected to more than one repository or organization by using the

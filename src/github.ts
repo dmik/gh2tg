@@ -112,12 +112,16 @@ type RepoMessage =
   subject2?: string;
   body?: string;
   bodyEscape?: boolean; // true by default
+  isPrivate?: boolean;
 };
 
 function repoMessage (msg_: RepoMessage): SendMessage
 {
+  const body = (msg_.bodyEscape ?? true) ? escapeAll (msg_.body) : msg_.body;
+  const isPrivate = msg_.isPrivate;
+
   const fields = [ msg_.icon, msg_.sender, msg_.subject, msg_.preposition ?? 'in', msg_.repo, msg_.subject2 ];
-  return [ fields.filter (Boolean).join (' ') + (msg_.body ? `\n\n${expQuote ((msg_.bodyEscape ?? true) ? escapeAll (msg_.body) : msg_.body)}` : '') ];
+  return { text: fields.filter (Boolean).join (' ') + (body ? `\n\n${expQuote (body)}` : ''), isPrivate };
 }
 
 
@@ -157,18 +161,18 @@ function getOrgHtmlUrl (payload_: GitHubPayload): string
   return (get (payload_, 'organization.url') as string)?.replace ('//api.github.com/orgs/', '//github.com/');
 }
 
-function getResource (payload_: GitHubPayload): [ string, string, unknown ]
+function getResource (payload_: GitHubPayload): { name: string, type: string, url: unknown, isPrivate: boolean }
 {
   let name, type, url;
 
   if (name = get (payload_, 'repository.name'))
   {
-    const isPrivate = get (payload_, 'repository.private');
+    const isPrivate = !! get (payload_, 'repository.private');
     type = `${isPrivate ? 'private' : 'public'} repository`;
     url = get (payload_, 'repository.html_url');
 
     const owner = getObject (payload_, 'repository.owner');
-    return [ repoLink (name, url, getFirst (owner, 'name|login'), get (owner, 'html_url')), type, url ];
+    return { name: repoLink (name, url, getFirst (owner, 'name|login'), get (owner, 'html_url')), type, url, isPrivate };
   }
   else if (name = get (payload_, 'organization.login'))
   {
@@ -181,7 +185,7 @@ function getResource (payload_: GitHubPayload): [ string, string, unknown ]
     type = 'resource';
   }
 
-  return [ `${boldLink (name, url)}`, type, url ];
+  return { name: `${boldLink (name, url)}`, type, url, isPrivate: false };
 }
 
 
@@ -223,23 +227,26 @@ function getActorLabel (actor_: UnknownObject): string
 export function formatGitHubEvent (event_: string, payload_: GitHubPayload): SendMessage | undefined
 {
   const action = escapeHtml (payload_.action ?? 'did something with');
-  const [ resName, resType, resUrl ] = getResource (payload_);
+  const res = getResource (payload_);
   const senderObj = getObject (payload_, 'sender');
   const sender = getActorLabel (senderObj);
   const isGhost = senderObj?.login === 'ghost';
+  const isPrivate = res.isPrivate;
 
   switch (event_)
   {
     case 'ping':
-      return [ `🏓 ${sender} connected ${resType} ${resName}`,
-        ! resUrl ? false : { link_preview_options: { url: resUrl } } ];
+      return { text: `🏓 ${sender} connected ${res.type} ${res.name}`,
+        options: ! res.url ? false : { link_preview_options: { url: res.url } },
+        isPrivate };
 
     case 'repository':
     {
       const isCreated = action === 'created';
       const isPublicized = action === 'publicized';
-      return [ `📚 ${sender} ${action} ${isCreated ? resType : event_} ${resName}`,
-        (! resUrl || ! (isCreated || isPublicized)) ? false : { link_preview_options: { url: resUrl } } ];
+      return { text: `📚 ${sender} ${action} ${isCreated ? res.type : event_} ${res.name}`,
+        options: (! res.url || ! (isCreated || isPublicized)) ? false : { link_preview_options: { url: res.url } },
+        isPrivate };
     }
 
     case 'public':
@@ -255,9 +262,9 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const pusher = getObject (payload_, 'pusher');
       const isCreated = !! payload_.created;
       const isDeleted = !! payload_.deleted;
-      const label = refLink (name ?? ref, ref, isDeleted ? undefined : resUrl);
+      const label = refLink (name ?? ref, ref, isDeleted ? undefined : res.url);
       const commit = isDeleted ? payload_.before : payload_.after;
-      const commitLabel = commitLink (commit, resUrl, true);
+      const commitLabel = commitLink (commit, res.url, true);
       const action = isCreated ? 'created ' : isDeleted ? 'deleted ' : '';
       const force = !! payload_.forced ? 'force-' : '';
 
@@ -279,7 +286,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       }
 
       if (! showCommits)
-        return repoMessage ({ repo: resName, icon, sender, subject: `${force}${subject} @ ${commitLabel}` });
+        return repoMessage ({ repo: res.name, icon, sender, subject: `${force}${subject} @ ${commitLabel}`, isPrivate });
 
       const commits: UnknownObject [] = Array.isArray (payload_.commits) ? payload_.commits : [];
       const count = commits.length;
@@ -288,7 +295,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       {
         if (i >= MAX_COMMITS)
         {
-          body += `\n…and ${commitRangeLink (`${count - i} more`, resUrl, commit.id, commits [count - 1].id)}`;
+          body += `\n…and ${commitRangeLink (`${count - i} more`, res.url, commit.id, commits [count - 1].id)}`;
           break;
         }
         const author = getObject (commit, 'author');
@@ -306,7 +313,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
         body += `\n• ${commitLink (commit.id, commit.url)}: ${escapeAll (firstLine)}${authorLabel}`;
       }
       body = body.trim ();
-      return repoMessage ({ repo: resName, icon, sender, subject: `${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject}`, body, bodyEscape: false });
+      return repoMessage ({ repo: res.name, icon, sender, subject: `${force}pushed ${link (`${count} commit${count === 1 ? '' : 's'}`, payload_.compare)} to ${subject}`, body, bodyEscape: false, isPrivate });
     }
 
     case 'issues':
@@ -326,10 +333,10 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           if (! isIssue) // pull request
             object.merged ? actionText = 'merged' : actionText2 = ' without merging';
           else if (object.state_reason)
-            actionText2 = ` as ${getIssueCloseReasonLabel (String (object.state_reason), resUrl)}`;
+            actionText2 = ` as ${getIssueCloseReasonLabel (String (object.state_reason), res.url)}`;
           break;
         case 'labeled':
-          actionText = `added label ${getLabelLabel (getObject (payload_, 'label'), resUrl)} to`;
+          actionText = `added label ${getLabelLabel (getObject (payload_, 'label'), res.url)} to`;
           break;
         case 'unlabeled':
           // GitHub BUG: no '.label' in the payload for 'unlabeled' action
@@ -361,7 +368,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           break;
         }
       }
-      return repoMessage ({ repo: resName, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}${actionText2}`, preposition, subject2, body });
+      return repoMessage ({ repo: res.name, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}${actionText2}`, preposition, subject2, body, isPrivate });
     }
 
     case 'issue_comment':
@@ -371,31 +378,31 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const [ body, actionText ] = (action === 'created')
         ? [ String (get (payload_, 'comment.body') ?? '').trim (), `commented on ${subject}` ]
         : [ '', `${action} ${subject} comment` ];
-      return repoMessage ({ repo: resName, icon: '💬', sender, subject: `${actionText} ${getIssueLabel (issue, get (payload_, 'comment.html_url'))}`, body });
+      return repoMessage ({ repo: res.name, icon: '💬', sender, subject: `${actionText} ${getIssueLabel (issue, get (payload_, 'comment.html_url'))}`, body, isPrivate });
     }
 
     case 'pull_request_review':
-      return repoMessage ({ repo: resName, icon: '👀', sender, subject: `${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))}` });
+      return repoMessage ({ repo: res.name, icon: '👀', sender, subject: `${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))}`, isPrivate });
 
     case 'label':
     {
       const isCreated = action === 'created';
       if (isCreated && isGhost)
         return; // Ignore default label bootstrapping at repository creation
-      return repoMessage ({ repo: resName, icon: '🔖', sender, subject: `${action} label ${getLabelLabel (getObject (payload_, 'label'), isCreated ? resUrl : undefined)}` });
+      return repoMessage ({ repo: res.name, icon: '🔖', sender, subject: `${action} label ${getLabelLabel (getObject (payload_, 'label'), isCreated ? res.url : undefined)}`, isPrivate });
     }
 
     case 'release':
-      return repoMessage ({ repo: resName, icon: '🚀', sender, subject: `${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))}` });
+      return repoMessage ({ repo: res.name, icon: '🚀', sender, subject: `${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))}`, isPrivate });
 
     case 'workflow_run':
-      return repoMessage ({ repo: resName, icon: '⚙️', sender, subject: `${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow ${boldLink (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))}` });
+      return repoMessage ({ repo: res.name, icon: '⚙️', sender, subject: `${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow ${boldLink (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))}`, isPrivate });
 
     case 'star':
-      return repoMessage ({ repo: resName, icon: '⭐', sender, subject: `${action} a star`, preposition: 'on' });
+      return repoMessage ({ repo: res.name, icon: '⭐', sender, subject: `${action} a star`, preposition: 'on', isPrivate });
 
     case 'fork':
-      return repoMessage ({ repo: resName, icon: '🍴', sender, subject: 'forked', preposition: '', subject2: `as ${getRepoLabel (getObject (payload_, 'forkee'))}` });
+      return repoMessage ({ repo: res.name, icon: '🍴', sender, subject: 'forked', preposition: '', subject2: `as ${getRepoLabel (getObject (payload_, 'forkee'))}`, isPrivate });
 
     case 'create':
     case 'delete':
@@ -404,7 +411,7 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       return;
 
     default:
-      return repoMessage ({ repo: resName, icon: '🔔', sender, subject: `${action} ${escapeHtml (event_)}` });
+      return repoMessage ({ repo: res.name, icon: '🔔', sender, subject: `${action} ${escapeHtml (event_)}`, isPrivate });
   }
 }
 
