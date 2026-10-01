@@ -81,7 +81,7 @@ function refLink (name_: unknown, ref_: unknown, repoUrl_?: unknown): string
 
 function repoLink (name_: unknown, url_: unknown, ownerName_: unknown, ownerUrl_: unknown): string
 {
-  return `${link (ownerName_, ownerUrl_)} / ${boldLink (name_, url_)}`;
+  return `${link (ownerName_, ownerUrl_)} ⟩ ${boldLink (name_, url_)}`;
 }
 
 
@@ -115,13 +115,25 @@ type RepoMessage =
   isPrivate?: boolean;
 };
 
+
+let newMessageStyle = true;
+
 function repoMessage (msg_: RepoMessage): SendMessage
 {
   const body = (msg_.bodyEscape ?? true) ? escapeAll (msg_.body) : msg_.body;
   const isPrivate = msg_.isPrivate;
 
-  const fields = [ msg_.icon, msg_.sender, msg_.subject, msg_.preposition ?? 'in', msg_.repo, msg_.subject2 ];
-  return { text: fields.filter (Boolean).join (' ') + (body ? `\n\n${expQuote (body)}` : ''), isPrivate };
+  if (newMessageStyle)
+  {
+    const header = msg_.icon + (msg_.repo ? ` ${msg_.repo} : ` : ' ');
+    const fields = [ msg_.sender, msg_.subject, msg_.subject2 ];
+    return { text: header + fields.filter (Boolean).join (' ') + (body ? `\n\n${expQuote (body)}` : ''), isPrivate };
+  }
+  else
+  {
+    const fields = [ msg_.icon, msg_.sender, msg_.subject, msg_.preposition ?? 'in', msg_.repo, msg_.subject2 ];
+    return { text: fields.filter (Boolean).join (' ') + (body ? `\n\n${expQuote (body)}` : ''), isPrivate };
+  }
 }
 
 

@@ -23,6 +23,7 @@
 - Ignore default label bootstrapping at repository creation.
 - Support milestoned/demilestoned issue / pull request actions.
 - Add support for separate Telegram group for private repository events.
+- Move repository name to beginning of message for repository events.
 
 ## v0.0.1 - 2026-08-10
 
