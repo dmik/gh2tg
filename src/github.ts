@@ -207,7 +207,7 @@ function getRepoLabel (repo_: UnknownObject)
 }
 
 
-function getIssueLabel (issue_: UnknownObject, url_?: unknown, title_?: string)
+function getIssueLabel (issue_: UnknownObject, title_?: string, url_?: unknown)
 {
   return `${code (`#${get (issue_, 'number')}`)} ${boldLink (title_ ?? get (issue_, 'title'), url_ ?? get (issue_, 'html_url'))}`;
 }
@@ -376,11 +376,27 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
         {
           const changes = getObject (payload_, 'changes');
           preposition = 'from';
-          subject2 = `to ${getIssueLabel (getObject (changes, 'new_issue'), undefined, '(〃)')} in ${getRepoLabel (getObject (changes, 'new_repository'))}`;
+          subject2 = `to issue ${getIssueLabel (getObject (changes, 'new_issue'), '(〃)')} in ${getRepoLabel (getObject (changes, 'new_repository'))}`;
           break;
         }
       }
       return repoMessage ({ repo: res.name, icon, sender, subject: `${actionText ?? action} ${subject} ${getIssueLabel (object)}${actionText2}`, preposition, subject2, body, isPrivate });
+    }
+
+    case 'milestone':
+    {
+      const milestone = getObject (payload_, 'milestone');
+      let actionText, title, subject2 = '', body;
+      if (action === 'edited')
+      {
+        const oldTitle = String (get (payload_, 'changes.title.from') ?? '');
+        if (oldTitle)
+          actionText = 'renamed', title = oldTitle,
+          subject2 = ` to ${boldLink (milestone.title, milestone.html_url)}`;
+      }
+      else if (action === 'created')
+        body = String (milestone.description ?? '');
+      return repoMessage ({ repo: res.name, icon: '🪧', sender, subject: `${actionText ?? action} milestone ${getIssueLabel (milestone, title)}${subject2}`, body, isPrivate });
     }
 
     case 'issue_comment':
@@ -390,11 +406,11 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const [ body, actionText ] = (action === 'created')
         ? [ String (get (payload_, 'comment.body') ?? '').trim (), `commented on ${subject}` ]
         : [ '', `${action} ${subject} comment` ];
-      return repoMessage ({ repo: res.name, icon: '💬', sender, subject: `${actionText} ${getIssueLabel (issue, get (payload_, 'comment.html_url'))}`, body, isPrivate });
+      return repoMessage ({ repo: res.name, icon: '💬', sender, subject: `${actionText} ${getIssueLabel (issue, undefined, get (payload_, 'comment.html_url'))}`, body, isPrivate });
     }
 
     case 'pull_request_review':
-      return repoMessage ({ repo: res.name, icon: '👀', sender, subject: `${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), get (payload_, 'review.html_url'))}`, isPrivate });
+      return repoMessage ({ repo: res.name, icon: '👀', sender, subject: `${action} pull request review ${getIssueLabel (getObject (payload_, 'pull_request'), undefined, get (payload_, 'review.html_url'))}`, isPrivate });
 
     case 'label':
     {

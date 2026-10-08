@@ -9,7 +9,7 @@ Telegram bot.
 
 - Individual repositories and GitHub.com organizations
 - Pushes, issues, issue comments, pull requests, and reviews
-- Releases, workflow runs, stars, and forks
+- Milestones, releases, workflow runs, stars, and forks
 - GitHub `ping` events and a useful generic fallback for other events
 - Hiding events from private repositories or posting them to another group
 - Telegram-safe formatting and entity-aware long-message splitting
