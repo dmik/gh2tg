@@ -141,6 +141,10 @@ npx wrangler tunnel create gh2tg-dev
 
 4.  Copy `.secrets.example` to `.dev.vars`, enter the development credentials.
 
+    NOTE: `npm run dev` uses `wrangler-dev.sh` to pass all values from `.dev.vars` as local `--var`
+    arguments to overcome `wrangler dev` limitations when using `secrets.required` in
+    `wrangler.jsonc`. See `wrangler-dev.sh` for details.
+
 5.  Run the Worker:
 
 ```sh

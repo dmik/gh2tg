@@ -10,7 +10,7 @@
     "deploy:test": "wrangler deploy --env test",
     "delete": "wrangler delete --env ''",
     "delete:test": "wrangler delete --env test",
-    "dev": "wrangler dev --port 8787 --tunnel --tunnel-name gh2tg-dev --env ''",
+    "dev": "./wrangler-dev.sh --port 8787 --tunnel --tunnel-name gh2tg-dev --env ''",
     "types": "wrangler types src/env.d.ts --include-runtime false",
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm test",
