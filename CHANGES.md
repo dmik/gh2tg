@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## v0.1.0 - 2026-10-13
 
 - Add `check-fixtures` script to check formatting of different payloads.
 - Enable previews in ping messages, replace resource type icons with text.
