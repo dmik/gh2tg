@@ -25,6 +25,7 @@
 - Add support for separate Telegram group for private repository events.
 - Move repository name to beginning of message for repository events.
 - Show titles and descriptions (for created actions) in milestone events.
+- License under PolyForm Noncommercial License 1.0.0.
 
 ## v0.0.1 - 2026-08-10
 
