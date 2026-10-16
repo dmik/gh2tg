@@ -85,6 +85,12 @@ function repoLink (name_: unknown, url_: unknown, ownerName_: unknown, ownerUrl_
 }
 
 
+function bold (text_: string): string
+{
+  return `<b>${escapeHtml (text_)}</b>`;
+}
+
+
 function code (text_: string): string
 {
   return `<code>${escapeHtml (text_)}</code>`;
@@ -432,6 +438,19 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
     case 'fork':
       return repoMessage ({ repo: res.name, icon: '🍴', sender, subject: 'forked', preposition: '', subject2: `as ${getRepoLabel (getObject (payload_, 'forkee'))}`, isPrivate });
 
+    case 'dependabot_alert':
+    {
+      const alert = getObject (payload_, 'alert');
+      const isAssigneesChanged = action == 'assignees_changed';
+      const isWithdrawn = ! isAssigneesChanged && action == 'withdrawn';
+      const actionText = isAssigneesChanged ? 'changed assignees' : isWithdrawn ? 'withdrew' : action.replaceAll ('_', '-');
+      const severity = String (get (alert, 'security_advisory.severity') ?? '');
+      const summary = String (getFirst (alert, 'security_advisory.summary|security_advisory.ghsa_id') ?? '???');
+      return repoMessage ({ repo: res.name, icon: '⚠️', sender, subject: `${actionText}${severity ? ` ${bold (severity)}` : ''} dependabot alert ${code (`#${get (alert, 'number')}`)} ${boldLink (summary, get (alert, 'html_url'))}`, isPrivate });
+    }
+
+    case 'repository_vulnerability_alert':
+      // This event is deprecated in favor of dependabot_alert, ignore (fall through).
     case 'create':
     case 'delete':
       // Create/delete events are for branch/tag only, but for those GitHub always delivers richer

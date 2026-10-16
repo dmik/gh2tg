@@ -1,0 +1,245 @@
+{
+  "action": "created",
+  "alert": {
+    "number": 352,
+    "state": "open",
+    "dependency": {
+      "package": {
+        "ecosystem": "npm",
+        "name": "pbkdf2"
+      },
+      "manifest_path": "yarn.lock",
+      "scope": "development",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-477h-4r7f-fvrx",
+      "cve_id": "CVE-2026-102414",
+      "summary": "pbkdf2 rehashes long passwords on every iteration, enabling denial of service",
+      "description": "### Summary\nThis is the same bug as Django had (CVE-2013-1443).\n\n### Details\nA long password can cause a DoS because it is not using cached HMAC, length limits, or pre-hashing passwords longer than the block size of the hash function as per HMAC spec. This line of code hashes the full password each iteration: https://github.com/browserify/pbkdf2/blob/1c3b1f526b052a29b3b42120c9821895772df7e8/lib/sync.js#L60\n\nAlso see https://github.com/browserify/pbkdf2/issues/82\n\n### PoC\nThe first key will take a lot longer to generate when not using the native code and uses code from `/lib/sync.js` (ie when this if statement is true):\nhttps://github.com/browserify/pbkdf2/blob/1c3b1f526b052a29b3b42120c9821895772df7e8/index.js#L33-L37\n\n```js\nvar pbkdf2 = require('pbkdf2');\nvar createHash = require('create-hash');\nvar pw = \".\".repeat(1048576); // 1 MiB\n\nvar t0 = performance.now();\nvar key1 = pbkdf2.pbkdf2Sync(pw, \"salt\", 1000, 32, \"sha256\");\nvar t1 = performance.now();\npw = createHash('sha256').update(pw).digest(); // HMAC specification for keys larger than block size\nvar key2 = pbkdf2.pbkdf2Sync(pw, \"salt\", 1000, 32, \"sha256\");\nvar t2 = performance.now();\n\nconsole.log(\"First took:  \" + (t1 - t0));\nconsole.log(\"Second took: \" + (t2 - t1));\nconsole.log(\"Generated keys:\");\nconsole.log(key1);\nconsole.log(key2);\n```\n\n### Impact\nDoS",
+      "severity": "medium",
+      "identifiers": [
+        {
+          "value": "GHSA-477h-4r7f-fvrx",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-102414",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://github.com/browserify/pbkdf2/security/advisories/GHSA-477h-4r7f-fvrx"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-102414"
+        },
+        {
+          "url": "https://github.com/browserify/pbkdf2/issues/82"
+        },
+        {
+          "url": "https://github.com/browserify/pbkdf2/commit/493d8d8ff437f680338bf7397398fda884ad462e"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-477h-4r7f-fvrx"
+        }
+      ],
+      "published_at": "2026-10-06T13:40:10Z",
+      "updated_at": "2026-10-06T13:40:10Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "npm",
+            "name": "pbkdf2"
+          },
+          "severity": "medium",
+          "vulnerable_version_range": "<= 3.1.6",
+          "first_patched_version": {
+            "identifier": "3.1.7"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+          "score": 3.7
+        },
+        "cvss_v4": {
+          "vector_string": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+          "score": 6.3
+        }
+      },
+      "epss": {
+        "percentage": 0.00284,
+        "percentile": 0.18762
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+        "score": 3.7
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-400",
+          "name": "Uncontrolled Resource Consumption"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "npm",
+        "name": "pbkdf2"
+      },
+      "severity": "medium",
+      "vulnerable_version_range": "<= 3.1.6",
+      "first_patched_version": {
+        "identifier": "3.1.7"
+      }
+    },
+    "url": "https://api.github.com/repos/dmik/test/dependabot/alerts/352",
+    "html_url": "https://github.com/dmik/test/security/dependabot/352",
+    "created_at": "2026-10-16T01:57:44Z",
+    "updated_at": "2026-10-16T01:57:44Z",
+    "dismissal_request": null,
+    "assignees": [
+
+    ],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": null,
+    "auto_dismissed_at": null
+  },
+  "repository": {
+    "id": 1330408924,
+    "node_id": "R_kgDOT0xt3A",
+    "name": "test",
+    "full_name": "dmik/test",
+    "private": true,
+    "owner": {
+      "login": "dmik",
+      "id": 900726,
+      "node_id": "MDQ6VXNlcjkwMDcyNg==",
+      "avatar_url": "https://avatars.githubusercontent.com/u/900726?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dmik",
+      "html_url": "https://github.com/dmik",
+      "followers_url": "https://api.github.com/users/dmik/followers",
+      "following_url": "https://api.github.com/users/dmik/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dmik/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dmik/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dmik/subscriptions",
+      "organizations_url": "https://api.github.com/users/dmik/orgs",
+      "repos_url": "https://api.github.com/users/dmik/repos",
+      "events_url": "https://api.github.com/users/dmik/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dmik/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "html_url": "https://github.com/dmik/test",
+    "description": null,
+    "fork": false,
+    "url": "https://api.github.com/repos/dmik/test",
+    "forks_url": "https://api.github.com/repos/dmik/test/forks",
+    "keys_url": "https://api.github.com/repos/dmik/test/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/dmik/test/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/dmik/test/teams",
+    "hooks_url": "https://api.github.com/repos/dmik/test/hooks",
+    "issue_events_url": "https://api.github.com/repos/dmik/test/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/dmik/test/events",
+    "assignees_url": "https://api.github.com/repos/dmik/test/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/dmik/test/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/dmik/test/tags",
+    "blobs_url": "https://api.github.com/repos/dmik/test/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/dmik/test/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/dmik/test/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/dmik/test/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/dmik/test/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/dmik/test/languages",
+    "stargazers_url": "https://api.github.com/repos/dmik/test/stargazers",
+    "contributors_url": "https://api.github.com/repos/dmik/test/contributors",
+    "subscribers_url": "https://api.github.com/repos/dmik/test/subscribers",
+    "subscription_url": "https://api.github.com/repos/dmik/test/subscription",
+    "commits_url": "https://api.github.com/repos/dmik/test/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/dmik/test/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/dmik/test/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/dmik/test/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/dmik/test/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/dmik/test/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/dmik/test/merges",
+    "archive_url": "https://api.github.com/repos/dmik/test/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/dmik/test/downloads",
+    "issues_url": "https://api.github.com/repos/dmik/test/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/dmik/test/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/dmik/test/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/dmik/test/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/dmik/test/labels{/name}",
+    "releases_url": "https://api.github.com/repos/dmik/test/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/dmik/test/deployments",
+    "created_at": "2026-08-11T02:10:08Z",
+    "updated_at": "2026-08-11T02:10:19Z",
+    "pushed_at": "2026-08-11T02:10:10Z",
+    "git_url": "git://github.com/dmik/test.git",
+    "ssh_url": "git@github.com:dmik/test.git",
+    "clone_url": "https://github.com/dmik/test.git",
+    "svn_url": "https://github.com/dmik/test",
+    "homepage": null,
+    "size": 25502,
+    "stargazers_count": 0,
+    "watchers_count": 0,
+    "language": null,
+    "has_issues": false,
+    "has_projects": true,
+    "has_downloads": false,
+    "has_wiki": false,
+    "has_pages": false,
+    "has_discussions": false,
+    "forks_count": 0,
+    "mirror_url": null,
+    "archived": false,
+    "disabled": false,
+    "open_issues_count": 0,
+    "license": null,
+    "allow_forking": false,
+    "is_template": false,
+    "web_commit_signoff_required": false,
+    "has_pull_requests": true,
+    "pull_request_creation_policy": "all",
+    "topics": [
+
+    ],
+    "visibility": "private",
+    "forks": 0,
+    "open_issues": 0,
+    "watchers": 0,
+    "default_branch": "master",
+    "custom_properties": {
+
+    }
+  },
+  "sender": {
+    "login": "github",
+    "id": 9919,
+    "node_id": "MDEyOk9yZ2FuaXphdGlvbjk5MTk=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/9919?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/github",
+    "html_url": "https://github.com/github",
+    "followers_url": "https://api.github.com/users/github/followers",
+    "following_url": "https://api.github.com/users/github/following{/other_user}",
+    "gists_url": "https://api.github.com/users/github/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/github/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/github/subscriptions",
+    "organizations_url": "https://api.github.com/users/github/orgs",
+    "repos_url": "https://api.github.com/users/github/repos",
+    "events_url": "https://api.github.com/users/github/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/github/received_events",
+    "type": "Organization",
+    "user_view_type": "public",
+    "site_admin": false
+  }
+}

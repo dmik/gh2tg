@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+- Show alert numbers, severity and clickable summaries for dependabot alerts.
+
 ## v0.1.0 - 2026-10-13
 
 - Add `check-fixtures` script to check formatting of different payloads.
