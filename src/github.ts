@@ -113,9 +113,9 @@ type RepoMessage =
   repo?: string;
   icon?: string;
   sender?: string;
-  subject?: string;
+  subject?: string | string [];
   preposition?: string; // 'in' by default
-  subject2?: string;
+  subject2?: string | string [];
   body?: string;
   bodyEscape?: boolean; // true by default
   isPrivate?: boolean;
@@ -128,16 +128,18 @@ function repoMessage (msg_: RepoMessage): SendMessage
 {
   const body = (msg_.bodyEscape ?? true) ? escapeAll (msg_.body) : msg_.body;
   const isPrivate = msg_.isPrivate;
+  const subjects = Array.isArray (msg_.subject) ? msg_.subject : [ msg_.subject ];
+  const subjects2 = Array.isArray (msg_.subject2) ? msg_.subject2 : [ msg_.subject2 ];
 
   if (newMessageStyle)
   {
     const header = msg_.icon + (msg_.repo ? ` ${msg_.repo} : ` : ' ');
-    const fields = [ msg_.sender, msg_.subject, msg_.subject2 ];
+    const fields = [ msg_.sender, ...subjects, ...subjects2 ];
     return { text: header + fields.filter (Boolean).join (' ') + (body ? `\n\n${expQuote (body)}` : ''), isPrivate };
   }
   else
   {
-    const fields = [ msg_.icon, msg_.sender, msg_.subject, msg_.preposition ?? 'in', msg_.repo, msg_.subject2 ];
+    const fields = [ msg_.icon, msg_.sender, ...subjects, msg_.preposition ?? 'in', msg_.repo, ...subjects2 ];
     return { text: fields.filter (Boolean).join (' ') + (body ? `\n\n${expQuote (body)}` : ''), isPrivate };
   }
 }
@@ -430,7 +432,19 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       return repoMessage ({ repo: res.name, icon: '🚀', sender, subject: `${action} release ${boldLink (getFirst (payload_, 'release.name|release.tag_name'), get (payload_, 'release.html_url'))}`, isPrivate });
 
     case 'workflow_run':
-      return repoMessage ({ repo: res.name, icon: '⚙️', sender, subject: `${escapeHtml (get (payload_, 'workflow_run.conclusion') ?? action)} workflow ${boldLink (get (payload_, 'workflow_run.name'), get (payload_, 'workflow_run.html_url'))}`, isPrivate });
+    {
+      const workflow = getObject (payload_, 'workflow_run');
+      const isInProgress = action === 'in_progress';
+      const isReRun = isInProgress && Number (get (workflow, 'run_attempt')) > 1;
+      if (isInProgress && ! isReRun)
+        return; // Ignore regular in_progress events to reduce noise
+      const isCompleted = ! isInProgress && action === 'completed';
+      const num = String (get (workflow, 'run_number') ?? '');
+      const event = String (get (workflow, 'event') ?? '').replaceAll ('_', ' ');
+      const conclusion = String (get (workflow, 'conclusion') ?? '').replaceAll ('_', ' ');
+      const actionText = isReRun ? 're-ran' : action;
+      return repoMessage ({ repo: res.name, icon: '⚙️', sender, subject: [ actionText, 'workflow', boldLink (get (workflow, 'name'), get (workflow, 'html_url')), num ? code (`#${num}`) : '', isCompleted && conclusion ? `as ${bold (conclusion)}` : event ? `with ${bold (event)}` : '' ], isPrivate });
+    }
 
     case 'star':
       return repoMessage ({ repo: res.name, icon: '⭐', sender, subject: `${action} a star`, preposition: 'on', isPrivate });
@@ -449,6 +463,11 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       return repoMessage ({ repo: res.name, icon: '⚠️', sender, subject: `${actionText}${severity ? ` ${bold (severity)}` : ''} dependabot alert ${code (`#${get (alert, 'number')}`)} ${boldLink (summary, get (alert, 'html_url'))}`, isPrivate });
     }
 
+    case 'check_run':
+    case 'check_suite':
+    case 'workflow_job':
+      // These events are workflow_run details accessible via the link, ignore them to reduce
+      // workflow notification noise (fall through).
     case 'repository_vulnerability_alert':
       // This event is deprecated in favor of dependabot_alert, ignore (fall through).
     case 'create':

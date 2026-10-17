@@ -10,7 +10,7 @@ Telegram bot.
 - Individual repositories and GitHub.com organizations
 - Pushes, issues, issue comments, pull requests, and reviews
 - Milestones, releases, stars, and forks
-- Workflow runs and dependabot alerts
+- GitHub Actions (workflow runs) and Dependabot alerts
 - GitHub `ping` events and a useful generic fallback for other events
 - Auto-ignoring deprecated events in favor of richer replacements
 - Hiding events from private repositories or posting them to another group
@@ -38,12 +38,18 @@ Prerequisites for both methods:
     powerful and doing this beforehand avoids reconfiguring the chat ID later as it will change
     after conversion.
 
-2.  Obtain the group's chat ID. One simple method is to inspect
-    `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates` right after adding the bot to the group.
-    Group IDs are usually negative; supergroup IDs normally begin with `-100`.
+2.  Obtain the group's chat ID. One simple method is to open
+    `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates` in a browser right after adding the bot to
+    the group and inspect the response. Group IDs are usually negative; supergroup IDs normally
+    begin with `-100`.
 
     If you want events from private repositories to be posted in another group, add the bot to that
     group and obtain its chat ID as described above.
+
+    Note that you can also use your Telegram ID as the target chat ID for both public and private
+    events. In this case, GitHub events will be posted to your private chat with the bot (you need
+    to start a conversation with the bot before it can message you). You can find your Telegram ID
+    (a positive number) in the `/getUpdates` response after sending the bot a message.
 
 
 ## Cloudflare-managed deployment
@@ -119,6 +125,12 @@ Requirements: A GitHub account for Cloudflare integration.
     - Secret: the exact `GITHUB_WEBHOOK_SECRET` value
     - Events: choose **Send me everything** or the events you want forwarded
     - Active: enabled
+
+    NOTE: To avoid message duplication, deprecated events that have richer replacements (e.g.
+    **Repository vulnerability alerts**, replaced with **Dependabot alerts**) are ignored even when
+    selected in the webhook settings. Events that represent details of **Workflow runs** (e.g.
+    **Workflow jobs**, **Check runs**, and **Check suites**) are also ignored to reduce the volume
+    of GitHub Actions notifications.
 
 If you have a GitHub organization and want to get notifications from all its repositories, you can
 set up the webhook in the organization's settings instead.

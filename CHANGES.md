@@ -2,7 +2,9 @@
 
 ## Next
 
-- Show alert numbers, severity and clickable summaries for dependabot alerts.
+- Show Dependabot alert numbers, severity, and clickable summaries.
+- Show workflow run numbers, triggers, and conclusions; identify re-runs.
+- Suppress intermediate workflow notifications.
 
 ## v0.1.0 - 2026-10-13
 
