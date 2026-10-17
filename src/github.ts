@@ -279,7 +279,6 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       const ref = String (payload_.ref ?? '');
       const [ _, type ] = ref.split ('/', 2);
       const name = ref.slice (_.length + 1 + (type?.length ?? 0) + 1);
-      const pusher = getObject (payload_, 'pusher');
       const isCreated = !! payload_.created;
       const isDeleted = !! payload_.deleted;
       const label = refLink (name ?? ref, ref, isDeleted ? undefined : res.url);
@@ -318,13 +317,19 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
           body += `\n…and ${commitRangeLink (`${count - i} more`, res.url, commit.id, commits [count - 1].id)}`;
           break;
         }
-        const author = getObject (commit, 'author');
+        // NOTE: pusher.email may be obfuscated by GitHub and won't match author.email. Also, sender
+        // (already attributed in the message) can be neither author nor pusher (and doesn't have
+        // .email or .name), so compare sender.login to author.username to catch the difference.
+        // Assume the latter is a valid GitHub user (we use GitHub user links instead of emails
+        // below anyway)
+        const authorLogin = getFirst (commit, 'author.username');
+        const authorName = getFirst (commit, 'author.name');
         let authorLabel = '';
-        if (author?.email !== pusher?.email)
+        if (authorLogin !== senderObj.login)
         {
           // NOTE: TG does not support mailto:, construct a GitHub user link
-          const authorLink = author?.username ? `https://github.com/${author.username}` : undefined;
-          authorLabel = ` // ${boldLink (author.username ?? author.name ?? 'someone', authorLink)}`;
+          const authorLink = authorLogin ? `https://github.com/${authorLogin}` : undefined;
+          authorLabel = ` // ${boldLink (authorLogin ?? authorName ?? 'someone', authorLink)}`;
         }
         const message = String (commit.message ?? '');
         const nl = message.indexOf ('\n');

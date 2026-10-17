@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+- Omit commit author link when author is push event sender.
+
 ## v0.1.1 - 2026-10-16
 
 - Show Dependabot alert numbers, severity, and clickable summaries.
