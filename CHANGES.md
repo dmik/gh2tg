@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## v0.1.1 - 2026-10-16
 
 - Show Dependabot alert numbers, severity, and clickable summaries.
 - Show workflow run numbers, triggers, and conclusions; identify re-runs.
