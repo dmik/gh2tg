@@ -4,6 +4,8 @@ import { formatGitHubEvent, verifyGitHubSignature } from '../src/github';
 import { readBodyWithLimit } from '../src/http';
 import { sendMessage, splitMessage } from '../src/telegram';
 import { MAX_WEBHOOK_BODY_BYTES, handleRequest } from '../src/worker';
+import { version } from '../package.json';
+import { commit, commitDate, commitTag } from '../.build/metadata.json';
 
 
 const env: Env =
@@ -25,6 +27,23 @@ async function signature (body_: string): Promise <string>
 
 
 afterEach (() => vi.restoreAllMocks ());
+
+
+describe ('health checks', () =>
+{
+  it.each ([ '/', '/health' ]) ('reports bundled build metadata at %s without external requests', async (path_) =>
+  {
+    const fetchMock = vi.spyOn (globalThis, 'fetch');
+    const response = await handleRequest (new Request (`https://worker.test${path_}`), env);
+    expect (response.status).toBe (200);
+    const body = await response.json ();
+    expect (body).toEqual ({ ok: true, service: 'worker.test', version, commitDate, commit, commitTag });
+    expect (Object.keys (body as object)).toEqual ([ 'ok', 'service', 'version', 'commitDate', 'commitTag', 'commit' ]);
+    expect (commitDate).toMatch (/^\d{4}-\d{2}-\d{2}$/);
+    expect (commit).toMatch (/^(?:[a-f0-9]{40}|[a-f0-9]{64})(?:-dirty)?$/i);
+    expect (fetchMock).not.toHaveBeenCalled ();
+  });
+});
 
 
 describe ('GitHub signature validation', () =>

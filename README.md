@@ -15,7 +15,7 @@ Telegram bot.
 - Auto-ignoring deprecated events in favor of richer replacements
 - Hiding events from private repositories or posting them to another group
 - Telegram-safe formatting and entity-aware long-message splitting
-- `/` and `/health` health checks
+- `/` and `/health` health checks including the Worker version info
 
 
 ## Setup
@@ -266,6 +266,26 @@ need to change the payload URL in the GitHub webhook settings accordingly. This 
 Redeliver button on the webhook's Recent Deliveries tab to redeliver events to the development
 environment. Using GitHub's redelivery feature is usually easier than hand-building a request,
 because requests must carry a valid GitHub signature.
+
+
+### Version check
+
+The version of the deployed Worker can be checked by opening the Worker URL in a browser (e.g. by
+clicking on the URL in the Cloudflare **Workers & Pages** dashboard). The response format is:
+
+```json
+{"ok":true,"service":"<your-worker-url>","version":"X.Y.Z","commitDate":"YYYY-MM-DD","commitTag":"vX.Y.Z","commit":"<commit-SHA>"}
+```
+
+Wrangler automatically generates and bundles the version info before deployment, including manual
+and Cloudflare-managed builds. The commit SHA is taken from `WORKERS_CI_COMMIT_SHA` when provided
+(by Cloudflare builds), otherwise it is obtained from the local checkout. Builds fail if neither
+supplies a valid SHA. Locally obtained commits have `-dirty` appended when Git reports uncommitted
+changes (excluding ignored files). The commit date is in the Git-recorded timezone. The commit tag
+is the first tag (in Git `refname` order), or `null` if the commit does not match any available tag.
+Cloudflare-managed builds (`WORKERS_CI=1`) automatically fetch tags from `origin` before generating
+metadata. A failed fetch fails the build instead of reporting incomplete release metadata. Manual
+builds use local tags without fetching.
 
 
 ### Verification

@@ -5,6 +5,7 @@
 - Show Dependabot alert numbers, severity, and clickable summaries.
 - Show workflow run numbers, triggers, and conclusions; identify re-runs.
 - Suppress intermediate workflow notifications.
+- Include Worker version and commit info in `/` and `/health` responses.
 
 ## v0.1.0 - 2026-10-13
 

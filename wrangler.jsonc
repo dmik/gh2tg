@@ -4,6 +4,10 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-08-07",
   "preview_urls": false,
+  "build": {
+    "command": "node scripts/build-metadata.mjs",
+    "watch_dir": ["src", "package.json"]
+  },
   "secrets": {
     "required": ["GITHUB_WEBHOOK_SECRET", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
   },

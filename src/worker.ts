@@ -2,6 +2,8 @@ import { formatGitHubEvent, type GitHubPayload, verifyGitHubSignature } from './
 import { readBodyWithLimit } from './http';
 import { sendMessage } from './telegram';
 import { tryCatch } from './util';
+import { version } from '../package.json';
+import { commit, commitDate, commitTag } from '../.build/metadata.json';
 
 
 export const MAX_WEBHOOK_BODY_BYTES = 25 * 1024 * 1024;
@@ -22,7 +24,7 @@ export async function handleRequest (request_: Request, env_: Env): Promise <Res
   const url = new URL (request_.url);
   if (request_.method === 'GET' && (url.pathname === '/' || url.pathname === '/health'))
   {
-    return json ({ ok: true, service: url.hostname });
+    return json ({ ok: true, service: url.hostname, version, commitDate, commitTag, commit });
   }
 
   if (url.pathname !== '/webhook')
