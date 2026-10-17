@@ -30,13 +30,32 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -n "$RELEASE_TAG" && ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Release tag must be empty or match vN.N.N (for example, v1.2.3)." >&2
+            echo "Release tag must be empty or match vX.Y.Z (for example, v1.2.3)." >&2
             exit 1
           fi
           if [[ -n "$RELEASE_TAG" ]]; then
             git check-ref-format "refs/tags/$RELEASE_TAG"
           fi
+
           git fetch origin main release
+          if [[ -n "$RELEASE_TAG" ]]; then
+            commit=$(git rev-parse origin/main)
+            version=$(git show "$commit:package.json" | sed -nE 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"([^"]*)",?[[:space:]]*$/\1/p')
+            if [[ "$version" != "${RELEASE_TAG#v}" ]]; then
+              echo "package.json version must be ${RELEASE_TAG#v} for tag $RELEASE_TAG; found '$version'." >&2
+              exit 1
+            fi
+
+            # Tags are lightweight; use the target commit's date in its recorded timezone.
+            date=$(git show -s --format=%cs "$commit")
+            header=$(git show "$commit:CHANGES.md" | awk '/^##([[:blank:]]|$)/ && !found++ { sub(/[[:space:]]*$/, ""); print }')
+            expected="## $RELEASE_TAG - $date"
+            if [[ "$header" != "$expected" ]]; then
+              echo "First CHANGES.md release header must be '$expected'; found '$header'." >&2
+              exit 1
+            fi
+          fi
+
           push_args=(--atomic)
           if [[ "$FORCE_RELEASE" == "true" ]]; then
             push_args+=("--force-with-lease=refs/heads/release:$(git rev-parse origin/release)")
