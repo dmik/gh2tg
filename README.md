@@ -283,9 +283,10 @@ and Cloudflare-managed builds. The commit SHA is taken from `WORKERS_CI_COMMIT_S
 supplies a valid SHA. Locally obtained commits have `-dirty` appended when Git reports uncommitted
 changes (excluding ignored files). The commit date is in the Git-recorded timezone. The commit tag
 is the first tag (in Git `refname` order), or `null` if the commit does not match any available tag.
-Cloudflare-managed builds (`WORKERS_CI=1`) automatically fetch tags from `origin` before generating
-metadata. A failed fetch fails the build instead of reporting incomplete release metadata. Manual
-builds use local tags without fetching.
+Cloudflare-managed builds (`WORKERS_CI=1`) automatically fetch tags from `origin` and from the
+original repository before generating metadata (`origin` tags take precedence). A failed fetch fails
+the build instead of reporting incomplete release metadata. Manual builds use local tags without
+fetching.
 
 
 ### Verification
