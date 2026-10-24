@@ -9,7 +9,7 @@ Telegram bot.
 
 - Individual repositories and GitHub.com organizations
 - Pushes, issues, issue comments, pull requests, and reviews
-- Milestones, releases, stars, and forks
+- Milestones, releases, stars, watches, and forks
 - GitHub Actions (workflow runs), deployments, and Dependabot alerts
 - GitHub `ping` events and a useful generic fallback for other events
 - Auto-ignoring deprecated events in favor of richer replacements

@@ -452,7 +452,10 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
     }
 
     case 'star':
-      return repoMessage ({ repo: res.name, icon: '⭐', sender, subject: `${action} a star`, preposition: 'on', isPrivate });
+      return repoMessage ({ repo: res.name, icon: '⭐', sender, subject: `${action === 'created' ? 'added' : 'removed'} a star`, preposition: 'on', isPrivate });
+
+    case 'watch':
+      return repoMessage ({ repo: res.name, icon: '👀', sender, subject: `${action} watching`, preposition: 'on', isPrivate });
 
     case 'fork':
       return repoMessage ({ repo: res.name, icon: '🍴', sender, subject: 'forked', preposition: '', subject2: `as ${getRepoLabel (getObject (payload_, 'forkee'))}`, isPrivate });
