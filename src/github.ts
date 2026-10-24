@@ -468,6 +468,36 @@ export function formatGitHubEvent (event_: string, payload_: GitHubPayload): Sen
       return repoMessage ({ repo: res.name, icon: '⚠️', sender, subject: `${actionText}${severity ? ` ${bold (severity)}` : ''} dependabot alert ${code (`#${get (alert, 'number')}`)} ${boldLink (summary, get (alert, 'html_url'))}`, isPrivate });
     }
 
+    case 'deployment':
+    case 'deployment_status':
+    {
+      const isStatus = event_ === 'deployment_status';
+      let actionText = 'requested';
+      let stateText = '';
+      if (isStatus)
+      {
+        const state = get (payload_, 'deployment_status.state');
+        switch (state)
+        {
+          case 'success':
+          case 'failure':
+          case 'error':
+            actionText = 'completed';
+            stateText = `as ${bold (state)}`;
+            break;
+          default:
+            // Ignore intermediate state changes
+            return;
+        }
+      }
+      const deploy = getObject (payload_, 'deployment');
+      const task = deploy.task ? bold (String (deploy.task)) : '';
+      const env = deploy.environment ? `(${bold (String (deploy.environment))})` : '';
+      const sha = deploy.sha ? `@ ${commitLink (deploy.sha, res.url, true)}` : '';
+      const ref = deploy.ref ? `on ${refLink (deploy.ref, deploy.ref, res.url)}` : '';
+      return repoMessage ({ repo: res.name, icon: '🛠️', sender, subject: [ actionText, 'deployment', task, env, sha, ref, stateText ], isPrivate });
+    }
+
     case 'check_run':
     case 'check_suite':
     case 'workflow_job':

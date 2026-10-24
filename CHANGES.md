@@ -4,6 +4,7 @@
 
 - Omit commit author link when author is push event sender.
 - Fetch original repo tags in Cloudflare-managed builds that use forks.
+- Show deployment details (task, commit, ref) and final deployment status.
 
 ## v0.1.1 - 2026-10-16
 
