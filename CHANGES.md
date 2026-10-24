@@ -1,6 +1,6 @@
 # Changelog
 
-## Next
+## v0.1.2 - 2026-10-24
 
 - Omit commit author link when author is push event sender.
 - Fetch original repo tags in Cloudflare-managed builds that use forks.
